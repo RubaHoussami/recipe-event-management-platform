@@ -15,6 +15,8 @@ from app.modules.recipes.repositories import (
     create_recipe,
     delete_recipe,
     get_recipe_by_id,
+    get_recipe_statuses,
+    get_recipe_tags,
     list_recipes,
     remove_recipe_status,
     remove_recipe_tag,
@@ -44,7 +46,9 @@ def get_recipe_controller(db: Session, recipe_id: uuid.UUID, current_user_id: uu
         raise NotFoundError("Recipe not found")
     if not can_view_recipe(db, recipe_id, current_user_id):
         raise ForbiddenError("Not allowed to access this recipe")
-    return RecipeResponse.model_validate(recipe)
+    tags = [t.tag for t in get_recipe_tags(db, recipe_id)]
+    statuses = [s.status for s in get_recipe_statuses(db, recipe_id)]
+    return RecipeResponse.model_validate(recipe).model_copy(update={"tags": tags, "statuses": statuses})
 
 
 def create_recipe_controller(

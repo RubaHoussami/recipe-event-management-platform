@@ -31,6 +31,8 @@ class RecipeResponse(BaseModel):
     cuisine: str | None
     ingredients: list[str]
     steps: list[str]
+    tags: list[str] = Field(default_factory=list, description="Tags (populated in GET single)")
+    statuses: list[str] = Field(default_factory=list, description="Statuses: favorite, to_try, made_before (populated in GET single)")
     created_at: datetime
     updated_at: datetime
 
