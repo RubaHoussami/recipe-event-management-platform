@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { login, register } from '../api/auth'
 import { getToken } from '../api/http'
 import { useTheme } from '../contexts/ThemeContext'
@@ -23,10 +23,6 @@ export function LandingPage() {
   const [signupPassword, setSignupPassword] = useState('')
 
   useEffect(() => {
-    if (getToken()) {
-      navigate('/dashboard', { replace: true })
-      return
-    }
     const hash = location.hash.replace('#', '')
     if (hash === 'signup') {
       setTab('signup')
@@ -88,8 +84,14 @@ export function LandingPage() {
           <button type="button" className="landing__theme-toggle" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
             {theme === 'dark' ? <IconLightMode className="app-icon icon--sm" /> : <IconDarkMode className="app-icon icon--sm" />}
           </button>
-          <button type="button" className="landing__nav-btn" onClick={() => goToAuth('login')}>Sign in</button>
-          <button type="button" className="landing__nav-btn landing__nav-btn--primary" onClick={() => goToAuth('signup')}>Sign up</button>
+          {getToken() ? (
+            <Link to="/dashboard" className="landing__nav-btn landing__nav-btn--primary">Go to dashboard</Link>
+          ) : (
+            <>
+              <button type="button" className="landing__nav-btn" onClick={() => goToAuth('login')}>Sign in</button>
+              <button type="button" className="landing__nav-btn landing__nav-btn--primary" onClick={() => goToAuth('signup')}>Sign up</button>
+            </>
+          )}
         </div>
       </header>
 

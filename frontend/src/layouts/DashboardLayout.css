@@ -1,7 +1,5 @@
 .dashboard {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
   background: var(--bg);
 }
 
@@ -14,10 +12,12 @@
   font-size: 0.9375rem;
 }
 
-/* Sticky top bar - stays fixed when main content scrolls */
+/* Top bar: fixed so it never scrolls */
 .dashboard__topbar {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 50;
   display: flex;
   align-items: center;
@@ -25,8 +25,9 @@
   padding: 0.75rem 1.5rem;
   background: var(--sidebar-bg);
   color: var(--sidebar-text);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  flex-shrink: 0;
+  border-bottom: 1px solid var(--sidebar-border);
+  height: var(--dashboard-topbar-height);
+  box-sizing: border-box;
 }
 
 .dashboard__brand {
@@ -52,7 +53,7 @@
   padding: 0.35rem 0.5rem;
   border-radius: var(--radius-sm);
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--sidebar-border);
   color: var(--sidebar-text-muted);
   font-size: 1rem;
 }
@@ -87,11 +88,11 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.875rem;
-  color: var(--sidebar-text-muted);
-  max-width: 200px;
+  color: var(--sidebar-text);
+  max-width: 180px;
   min-width: 0;
 }
-.dashboard__user-email {
+.dashboard__user-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -114,61 +115,54 @@
   font-size: 0.9rem;
 }
 
-.dashboard__settings {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--sidebar-text-muted);
-  text-decoration: none;
-  font-size: 1.1rem;
-}
-.dashboard__settings:hover {
-  background: var(--sidebar-hover);
-  color: var(--sidebar-text);
-  text-decoration: none;
-}
-
-.dashboard__logout {
-  padding: 0.4rem 0.75rem;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--sidebar-text-muted);
-  font-size: 0.875rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-.dashboard__logout:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--sidebar-text);
-}
-
-/* Body: sidebar + main. Only main scrolls so sidebar stays put */
+/* Body: fixed sidebar + main. Only main scrolls. */
 .dashboard__body {
-  flex: 1;
   display: flex;
-  min-height: 0;
-  overflow: hidden;
+  padding-top: var(--dashboard-topbar-height, 52px);
+  min-height: 100vh;
 }
 
+/* Sidebar: fixed so it never scrolls; full height below topbar */
 .dashboard__sidenav {
-  width: 260px;
-  flex-shrink: 0;
+  position: fixed;
+  top: var(--dashboard-topbar-height);
+  left: 0;
+  bottom: 0;
+  width: var(--dashboard-sidenav-width);
   background: var(--sidebar-bg);
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
-  overflow-y: auto;
-  overflow-x: hidden;
+  border-right: 1px solid var(--sidebar-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 40;
 }
 
 .dashboard__nav {
   padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dashboard__nav-sections {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .dashboard__nav-section {
   margin-bottom: 0.25rem;
+}
+
+.dashboard__nav-section--bottom {
+  flex-shrink: 0;
+  margin-top: auto;
+  margin-bottom: 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--sidebar-border);
 }
 
 .dashboard__nav-label {
@@ -191,8 +185,15 @@
   color: var(--sidebar-text-muted);
   text-decoration: none;
   font-size: 0.9375rem;
+  line-height: 1.35;
   border-left: 3px solid transparent;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
+  box-sizing: border-box;
+}
+.dashboard__nav-link .app-icon {
+  flex-shrink: 0;
+  width: 1.25em;
+  height: 1.25em;
 }
 .dashboard__nav-link:hover {
   color: var(--sidebar-text);
@@ -215,8 +216,47 @@
   border-left-color: var(--sidebar-accent);
 }
 
+/* Account section: align Settings and Log out icons by using same padding and icon slot width */
+.dashboard__nav-section--bottom .dashboard__nav-link,
+.dashboard__nav-section--bottom .dashboard__nav-link--logout {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+.dashboard__nav-section--bottom .dashboard__nav-link .app-icon,
+.dashboard__nav-section--bottom .dashboard__nav-link--logout .app-icon {
+  flex-shrink: 0;
+  width: 1.25em;
+  height: 1.25em;
+  min-width: 1.25em;
+}
+
+.dashboard__nav-link--logout {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  border-left: 3px solid transparent;
+  background: transparent;
+  color: var(--sidebar-text-muted);
+  padding: 0.5rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.35;
+  transition: background 0.15s, color 0.15s;
+  box-sizing: border-box;
+}
+.dashboard__nav-link--logout:hover {
+  color: var(--sidebar-text);
+  background: var(--sidebar-hover);
+}
+
 .dashboard__main {
   flex: 1;
+  margin-left: var(--dashboard-sidenav-width);
+  min-width: 0;
   overflow: auto;
   padding: 1.5rem 2rem;
   background: var(--bg);
@@ -227,7 +267,7 @@
   .dashboard__main {
     padding: 1.25rem 1.5rem;
   }
-  .dashboard__user-email {
+  .dashboard__user-name {
     max-width: 120px;
   }
 }
@@ -239,11 +279,14 @@
   .dashboard__topbar-right {
     gap: 0.35rem;
   }
-  .dashboard__user-email {
-    display: none;
+  .dashboard__user-name {
+    max-width: 80px;
   }
   .dashboard__sidenav {
     width: 72px;
+  }
+  .dashboard__main {
+    margin-left: 72px;
   }
   .dashboard__nav-label,
   .dashboard__nav-link-text {

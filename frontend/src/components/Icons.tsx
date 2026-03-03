@@ -10,6 +10,7 @@ import {
   MdGroup,
   MdHome,
   MdLightMode,
+  MdLogout,
   MdMenuBook,
   MdNotifications,
   MdSettings,
@@ -50,4 +51,7 @@ export function IconShare({ className }: { className?: string }) {
 }
 export function IconSparkles({ className }: { className?: string }) {
   return <MdAutoAwesome className={className ?? iconClass} aria-hidden />
+}
+export function IconLogout({ className }: { className?: string }) {
+  return <MdLogout className={className ?? iconClass} aria-hidden />
 }

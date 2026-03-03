@@ -69,6 +69,7 @@
 .friends-page__item-info strong {
   display: block;
   font-size: 0.9375rem;
+  color: var(--text);
 }
 .friends-page__email {
   display: block;

@@ -13,6 +13,7 @@ import {
   IconFriends,
   IconHome,
   IconLightMode,
+  IconLogout,
   IconNotifications,
   IconRecipes,
   IconSettings,
@@ -62,51 +63,57 @@ export function DashboardLayout() {
           <NavLink to="/dashboard/notifications" className="dashboard__notifications" aria-label="Notifications"><IconNotifications className="app-icon icon--sm" /></NavLink>
           <NavLink to="/dashboard/friends" className="dashboard__friends" aria-label="Friends"><IconFriends className="app-icon icon--sm" /></NavLink>
           <span className="dashboard__user" title={user?.email ?? ''}>
+            <span className="dashboard__user-name">{(user?.name || user?.email) ?? '—'}</span>
             {avatarUrl ? <img src={avatarUrl} alt="" className="dashboard__avatar" /> : <span className="dashboard__avatar dashboard__avatar--placeholder">{(user?.name || user?.email || '?')[0].toUpperCase()}</span>}
-            <span className="dashboard__user-email">{user?.email ?? '—'}</span>
           </span>
-          <NavLink to="/dashboard/settings" className="dashboard__settings" aria-label="Settings"><IconSettings className="app-icon icon--sm" /></NavLink>
-          <button type="button" className="dashboard__logout" onClick={handleLogout}>Log out</button>
         </div>
       </header>
       <div className="dashboard__body">
         <aside className="dashboard__sidenav">
           <nav className="dashboard__nav">
-            <div className="dashboard__nav-section">
-              <div className="dashboard__nav-label">Main</div>
-              <NavLink to="/dashboard" className={({ isActive }) => `dashboard__nav-link dashboard__nav-link--parent ${isActive ? 'active' : ''}`}>
-                <IconHome className="app-icon" /><span className="dashboard__nav-link-text">Home</span>
-              </NavLink>
+            <div className="dashboard__nav-sections">
+              <div className="dashboard__nav-section">
+                <div className="dashboard__nav-label">Main</div>
+                <NavLink to="/dashboard" className={({ isActive }) => `dashboard__nav-link dashboard__nav-link--parent ${isActive ? 'active' : ''}`}>
+                  <IconHome className="app-icon" /><span className="dashboard__nav-link-text">Home</span>
+                </NavLink>
+              </div>
+              <div className="dashboard__nav-section">
+                <div className="dashboard__nav-label">Recipes</div>
+                <NavLink to="/dashboard/recipes" className={({ isActive }) => `dashboard__nav-link ${isActive && path === '/dashboard/recipes' ? 'active' : ''}`}>
+                  <IconRecipes className="app-icon" /><span className="dashboard__nav-link-text">All recipes</span>
+                </NavLink>
+                <NavLink to="/dashboard/recipes/new" className={({ isActive }) => `dashboard__nav-link ${isActive ? 'active' : ''}`}>
+                  <IconAdd className="app-icon" /><span className="dashboard__nav-link-text">New recipe</span>
+                </NavLink>
+              </div>
+              <div className="dashboard__nav-section">
+                <div className="dashboard__nav-label">Events</div>
+                <NavLink to="/dashboard/events" className={({ isActive }) => `dashboard__nav-link ${isActive && path === '/dashboard/events' ? 'active' : ''}`}>
+                  <IconEvents className="app-icon" /><span className="dashboard__nav-link-text">All events</span>
+                </NavLink>
+                <NavLink to="/dashboard/events/new" className={({ isActive }) => `dashboard__nav-link ${isActive ? 'active' : ''}`}>
+                  <IconAdd className="app-icon" /><span className="dashboard__nav-link-text">New event</span>
+                </NavLink>
+              </div>
+              <div className="dashboard__nav-section">
+                <div className="dashboard__nav-label">Social</div>
+                <NavLink to="/dashboard/friends" className={({ isActive }) => `dashboard__nav-link ${isActive ? 'active' : ''}`}>
+                  <IconFriends className="app-icon" /><span className="dashboard__nav-link-text">Friends</span>
+                </NavLink>
+                <NavLink to="/dashboard/notifications" className={({ isActive }) => `dashboard__nav-link ${isActive ? 'active' : ''}`}>
+                  <IconNotifications className="app-icon" /><span className="dashboard__nav-link-text">Notifications</span>
+                </NavLink>
+              </div>
             </div>
-            <div className="dashboard__nav-section">
-              <div className="dashboard__nav-label">Recipes</div>
-              <NavLink to="/dashboard/recipes" className={({ isActive }) => `dashboard__nav-link ${isActive && path === '/dashboard/recipes' ? 'active' : ''}`}>
-                <IconRecipes className="app-icon" /><span className="dashboard__nav-link-text">All recipes</span>
-              </NavLink>
-              <NavLink to="/dashboard/recipes/new" className={({ isActive }) => `dashboard__nav-link ${isActive ? 'active' : ''}`}>
-                <IconAdd className="app-icon" /><span className="dashboard__nav-link-text">New recipe</span>
-              </NavLink>
-            </div>
-            <div className="dashboard__nav-section">
-              <div className="dashboard__nav-label">Events</div>
-              <NavLink to="/dashboard/events" className={({ isActive }) => `dashboard__nav-link ${isActive && path === '/dashboard/events' ? 'active' : ''}`}>
-                <IconEvents className="app-icon" /><span className="dashboard__nav-link-text">All events</span>
-              </NavLink>
-              <NavLink to="/dashboard/events/new" className={({ isActive }) => `dashboard__nav-link ${isActive ? 'active' : ''}`}>
-                <IconAdd className="app-icon" /><span className="dashboard__nav-link-text">New event</span>
-              </NavLink>
-            </div>
-            <div className="dashboard__nav-section">
-              <div className="dashboard__nav-label">Social</div>
-              <NavLink to="/dashboard/friends" className={({ isActive }) => `dashboard__nav-link dashboard__nav-link--parent ${isActive ? 'active' : ''}`}>
-                <IconFriends className="app-icon" /><span className="dashboard__nav-link-text">Friends</span>
-              </NavLink>
-            </div>
-            <div className="dashboard__nav-section">
+            <div className="dashboard__nav-section dashboard__nav-section--bottom">
               <div className="dashboard__nav-label">Account</div>
               <NavLink to="/dashboard/settings" className={({ isActive }) => `dashboard__nav-link dashboard__nav-link--parent ${isActive ? 'active' : ''}`}>
                 <IconSettings className="app-icon" /><span className="dashboard__nav-link-text">Settings</span>
               </NavLink>
+              <button type="button" className="dashboard__nav-link dashboard__nav-link--parent dashboard__nav-link--logout" onClick={handleLogout}>
+                <IconLogout className="app-icon" /><span className="dashboard__nav-link-text">Log out</span>
+              </button>
             </div>
           </nav>
         </aside>
