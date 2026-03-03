@@ -33,3 +33,11 @@ class RecipeResponse(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class RecipeTagAdd(BaseModel):
+    tag: str = Field(..., min_length=1, max_length=255)
+
+
+class RecipeStatusAdd(BaseModel):
+    status: str = Field(..., pattern="^(favorite|to_try|made_before)$")
