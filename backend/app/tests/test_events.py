@@ -106,3 +106,50 @@ def test_delete_event(client: TestClient, auth_headers: dict[str, str]) -> None:
     assert r.status_code == 204
     r2 = client.get(f"/events/{event_id}", headers=auth_headers)
     assert r2.status_code == 404
+
+
+def test_invite_and_respond(client: TestClient) -> None:
+    """Owner creates event, invites user by email; invitee responds with token."""
+    client.post(
+        "/auth/register",
+        json={"email": "owner@events.com", "name": "Owner", "password": "password123"},
+    )
+    client.post(
+        "/auth/register",
+        json={"email": "invitee@events.com", "name": "Invitee", "password": "password123"},
+    )
+    owner_login = client.post("/auth/login", json={"email": "owner@events.com", "password": "password123"})
+    invitee_login = client.post("/auth/login", json={"email": "invitee@events.com", "password": "password123"})
+    owner_headers = {"Authorization": f"Bearer {owner_login.json()['access_token']}"}
+    invitee_headers = {"Authorization": f"Bearer {invitee_login.json()['access_token']}"}
+    start = datetime(2025, 12, 1, 18, 0, 0, tzinfo=timezone.utc)
+    er = client.post(
+        "/events/",
+        json={"title": "Party", "start_time": _iso(start)},
+        headers=owner_headers,
+    )
+    event_id = er.json()["id"]
+    ir = client.post(
+        f"/events/{event_id}/invites",
+        json={"invited_email": "invitee@events.com"},
+        headers=owner_headers,
+    )
+    assert ir.status_code == 201
+    token = ir.json()["token"]
+    assert ir.json()["status"] == "pending"
+    # Invitee responds
+    resp = client.post(
+        f"/invites/{token}/respond",
+        json={"status": "accepted"},
+        headers=invitee_headers,
+    )
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "accepted"
+    # Attendees list includes owner and invitee
+    att = client.get(f"/events/{event_id}/attendees", headers=owner_headers)
+    assert att.status_code == 200
+    assert att.json()["owner"]["status"] == "owner"
+    invitees = att.json()["invitees"]
+    assert len(invitees) == 1
+    assert invitees[0]["email"] == "invitee@events.com"
+    assert invitees[0]["status"] == "accepted"
