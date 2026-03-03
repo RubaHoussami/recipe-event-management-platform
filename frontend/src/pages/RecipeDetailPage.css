@@ -1,0 +1,120 @@
+.recipe-detail__nav {
+  margin-bottom: 1.25rem;
+}
+.recipe-detail__nav a {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+}
+.recipe-detail__nav a:hover {
+  color: var(--accent);
+}
+
+.recipe-detail__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.recipe-detail__head h1 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.recipe-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.recipe-detail__actions a,
+.recipe-detail__actions button {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.875rem;
+}
+.recipe-detail__actions a {
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+}
+.recipe-detail__actions a:hover {
+  background: var(--bg);
+  text-decoration: none;
+  color: var(--text);
+}
+
+.recipe-detail__cuisine {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  margin: 0 0 1rem;
+}
+
+.recipe-detail section {
+  margin-bottom: 1.5rem;
+}
+.recipe-detail section h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem;
+  color: var(--text);
+}
+
+.recipe-detail__tags,
+.recipe-detail__statuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0;
+}
+.recipe-detail__tag,
+.recipe-detail__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--accent-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+.recipe-detail__tag button,
+.recipe-detail__status button {
+  padding: 0 0.35rem;
+  font-size: 0.85em;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 4px;
+}
+.recipe-detail__tag button:hover,
+.recipe-detail__status button:hover {
+  color: var(--error);
+  background: var(--error-bg);
+}
+
+.recipe-detail__add-tag {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+.recipe-detail__add-tag input {
+  width: 120px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.recipe-detail ul,
+.recipe-detail ol {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--text);
+}
+.recipe-detail li {
+  margin-bottom: 0.25rem;
+}

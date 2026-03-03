@@ -15,12 +15,11 @@ export interface UserMe {
 }
 
 export async function register(email: string, name: string, password: string): Promise<TokenResponse> {
-  const data = await apiRequest<TokenResponse>('/auth/register', {
+  await apiRequest('/auth/register', {
     method: 'POST',
     body: JSON.stringify({ email, name, password }),
   })
-  setToken(data.access_token)
-  return data
+  return login(email, password)
 }
 
 export async function login(email: string, password: string): Promise<TokenResponse> {
@@ -38,4 +37,11 @@ export function logout(): void {
 
 export async function getMe(): Promise<UserMe> {
   return apiRequest<UserMe>('/auth/me')
+}
+
+export async function setOpenAIKey(openaiApiKey: string | null): Promise<void> {
+  await apiRequest('/auth/me/ai-key', {
+    method: 'PATCH',
+    body: JSON.stringify({ openai_api_key: openaiApiKey }),
+  })
 }

@@ -1,0 +1,84 @@
+import { useState } from 'react'
+import { parseRecipe } from '../api/ai'
+import { createRecipe } from '../api/recipes'
+import './modal.css'
+
+interface ParseRecipeModalProps {
+  onClose: () => void
+  onCreated: () => void
+}
+
+export function ParseRecipeModal({ onClose, onCreated }: ParseRecipeModalProps) {
+  const [freeText, setFreeText] = useState('')
+  const [useOpenai, setUseOpenai] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [parsed, setParsed] = useState<{ title: string; ingredients: string[]; steps: string[] } | null>(null)
+
+  async function handleParse(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setParsed(null)
+    setLoading(true)
+    try {
+      const res = await parseRecipe(freeText, useOpenai)
+      setParsed(res)
+    } catch (err: unknown) {
+      setError(err && typeof err === 'object' && 'detail' in err ? String((err as { detail: unknown }).detail) : 'Parse failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleCreate() {
+    if (!parsed) return
+    setLoading(true)
+    setError(null)
+    try {
+      await createRecipe({
+        title: parsed.title,
+        ingredients: parsed.ingredients,
+        steps: parsed.steps,
+      })
+      onCreated()
+      onClose()
+    } catch (err: unknown) {
+      setError(err && typeof err === 'object' && 'detail' in err ? String((err as { detail: unknown }).detail) : 'Create failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal__head">
+          <h2>Parse recipe from text</h2>
+          <button type="button" onClick={onClose} aria-label="Close">×</button>
+        </div>
+        <form onSubmit={handleParse}>
+          <textarea
+            placeholder="Paste recipe text…"
+            value={freeText}
+            onChange={(e) => setFreeText(e.target.value)}
+            rows={5}
+            required
+          />
+          <label>
+            <input type="checkbox" checked={useOpenai} onChange={(e) => setUseOpenai(e.target.checked)} />
+            Use OpenAI (if configured)
+          </label>
+          <button type="submit" disabled={loading}>Parse</button>
+        </form>
+        {error && <p className="modal__error">{error}</p>}
+        {parsed && (
+          <div className="modal__parsed">
+            <p><strong>{parsed.title}</strong></p>
+            <p>Ingredients: {parsed.ingredients.length}. Steps: {parsed.steps.length}.</p>
+            <button type="button" onClick={handleCreate} disabled={loading}>Create recipe</button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

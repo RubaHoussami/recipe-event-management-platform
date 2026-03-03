@@ -1,5 +1,16 @@
 const API_BASE = '/api'
 
+export type ApiError = { status?: number; detail: unknown }
+
+function onUnauthorized(): void {
+  try {
+    localStorage.removeItem('access_token')
+  } catch {
+    // ignore
+  }
+  window.location.replace('/')
+}
+
 function getAuthHeader(): string | undefined {
   const token = localStorage.getItem('access_token')
   return token ? `Bearer ${token}` : undefined
@@ -25,6 +36,10 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
     }
   }
 
+  if (res.status === 401) {
+    onUnauthorized()
+    throw { status: 401, detail: (typeof data === 'object' && data !== null && 'detail' in data) ? (data as { detail: unknown }).detail : 'Unauthorized' }
+  }
   if (!res.ok) {
     const err = typeof data === 'object' && data !== null && 'detail' in data
       ? (data as { detail: unknown })
