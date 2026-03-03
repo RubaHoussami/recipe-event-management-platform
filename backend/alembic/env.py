@@ -9,7 +9,10 @@ from sqlalchemy.orm import sessionmaker
 from app.common.models import Base
 from app.core.config import get_settings
 
-config = context.config()
+# Import all models so they are registered with Base.metadata
+from app.modules.users import models as _users_models  # noqa: F401
+
+config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 

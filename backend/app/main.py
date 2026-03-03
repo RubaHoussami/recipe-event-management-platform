@@ -51,9 +51,10 @@ def create_app() -> FastAPI:
     def health() -> dict[str, str]:
         return {"status": "ok"}
 
-    # Routers (auth, recipes, etc.) will be included in later milestones
-    # from app.modules.auth.routes import router as auth_router
-    # app.include_router(auth_router, prefix="/auth", tags=["Auth"])
+    # ---------- Auth (public: register, login; protected: me) ----------
+    from app.modules.auth.routes import router as auth_router
+
+    app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 
     return app
 
