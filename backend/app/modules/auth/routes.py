@@ -12,8 +12,15 @@ from app.modules.auth.controllers import (
     login_controller_auth,
     me_controller_auth,
     register_controller_auth,
+    set_openai_key_controller,
 )
-from app.modules.auth.schemas import LoginRequest, RegisterRequest, TokenResponse, UserMeResponse
+from app.modules.auth.schemas import (
+    LoginRequest,
+    RegisterRequest,
+    SetOpenAIKeyRequest,
+    TokenResponse,
+    UserMeResponse,
+)
 from app.modules.users.models import User
 
 router = APIRouter()
@@ -76,3 +83,23 @@ def me(
     current_user: Annotated[User, Depends(get_current_user)],
 ):
     return me_controller_auth(db, user_id=str(current_user.id))
+
+
+@router.patch(
+    "/me/ai-key",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Set or clear OpenAI API key",
+    description="Store your key (encrypted) to enable AI features, or send null to clear. Key is never returned in any response.",
+    responses={
+        204: {"description": "Key updated"},
+        401: {"description": "Unauthorized"},
+        422: {"description": "Validation error"},
+    },
+    tags=["Auth"],
+)
+def set_ai_key(
+    body: SetOpenAIKeyRequest,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    set_openai_key_controller(db, str(current_user.id), body.openai_api_key)

@@ -18,6 +18,7 @@ class RecipeCreate(BaseModel):
 class RecipeUpdate(BaseModel):
     title: str | None = Field(None, min_length=1, max_length=500)
     description: str | None = None
+    cuisine: str | None = Field(None, max_length=100)
     ingredients: list[str] | None = None
     steps: list[str] | None = None
 
@@ -27,6 +28,7 @@ class RecipeResponse(BaseModel):
     owner_id: uuid.UUID
     title: str
     description: str | None
+    cuisine: str | None
     ingredients: list[str]
     steps: list[str]
     created_at: datetime

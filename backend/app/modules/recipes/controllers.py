@@ -79,6 +79,7 @@ def update_recipe_controller(
         recipe,
         title=body.title,
         description=body.description,
+        cuisine=body.cuisine,
         ingredients=body.ingredients,
         steps=body.steps,
     )

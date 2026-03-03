@@ -20,6 +20,7 @@ def create_recipe(
     owner_id: uuid.UUID,
     title: str,
     description: str | None = None,
+    cuisine: str | None = None,
     ingredients: list[str] | None = None,
     steps: list[str] | None = None,
 ) -> Recipe:
@@ -27,6 +28,7 @@ def create_recipe(
         owner_id=owner_id,
         title=title,
         description=description,
+        cuisine=cuisine,
         ingredients=ingredients or [],
         steps=steps or [],
     )
@@ -70,6 +72,7 @@ def update_recipe(
     recipe: Recipe,
     title: str | None = None,
     description: str | None = None,
+    cuisine: str | None = None,
     ingredients: list[str] | None = None,
     steps: list[str] | None = None,
 ) -> Recipe:
@@ -77,6 +80,8 @@ def update_recipe(
         recipe.title = title
     if description is not None:
         recipe.description = description
+    if cuisine is not None:
+        recipe.cuisine = cuisine
     if ingredients is not None:
         recipe.ingredients = ingredients
     if steps is not None:

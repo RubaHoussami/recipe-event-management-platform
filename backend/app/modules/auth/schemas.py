@@ -26,3 +26,8 @@ class UserMeResponse(BaseModel):
     name: str
     role: str
     created_at: str
+    openai_configured: bool = Field(False, description="True if user has stored an OpenAI key (key never returned)")
+
+
+class SetOpenAIKeyRequest(BaseModel):
+    openai_api_key: str | None = Field(None, description="Key to store (encrypted); send null to clear")

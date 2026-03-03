@@ -22,6 +22,7 @@ class Recipe(Base, UUIDMixin, TimestampMixin):
     )
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    cuisine: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
     ingredients: Mapped[list[Any]] = mapped_column(JSONB, nullable=False, server_default="[]")
     steps: Mapped[list[Any]] = mapped_column(JSONB, nullable=False, server_default="[]")
 

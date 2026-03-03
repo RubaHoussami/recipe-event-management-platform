@@ -25,6 +25,7 @@ def login_controller_auth(db: Session, email: str, password: str) -> TokenRespon
 
 
 def me_controller_auth(db: Session, user_id: str) -> UserMeResponse:
+    from app.modules.users.repositories import has_openai_key
     me = me_controller(db, user_id)
     return UserMeResponse(
         id=str(me.id),
@@ -32,4 +33,11 @@ def me_controller_auth(db: Session, user_id: str) -> UserMeResponse:
         name=me.name,
         role=me.role,
         created_at=me.created_at.isoformat(),
+        openai_configured=has_openai_key(db, user_id),
     )
+
+
+def set_openai_key_controller(db: Session, user_id: str, openai_api_key: str | None) -> None:
+    """Store or clear user's OpenAI key (encrypted). Never return the key."""
+    from app.modules.users.repositories import set_openai_key
+    set_openai_key(db, user_id, openai_api_key)

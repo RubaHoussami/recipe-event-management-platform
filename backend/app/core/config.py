@@ -29,8 +29,8 @@ class Settings(BaseSettings):
     # CORS (comma-separated string in env, parsed to list)
     cors_origins: str | List[str] = "http://localhost:5173,http://localhost:3000"
 
-    # Optional AI
-    openai_api_key: str | None = None
+    # Encrypt user-stored OpenAI keys at rest (Fernet key: 32 bytes base64url)
+    encryption_key: str = ""
 
     @field_validator("cors_origins", mode="before")
     @classmethod
