@@ -53,8 +53,10 @@ def create_app() -> FastAPI:
 
     # ---------- Auth (public: register, login; protected: me) ----------
     from app.modules.auth.routes import router as auth_router
+    from app.modules.recipes.routes import router as recipes_router
 
     app.include_router(auth_router, prefix="/auth", tags=["Auth"])
+    app.include_router(recipes_router, prefix="/recipes", tags=["Recipes"])
 
     return app
 

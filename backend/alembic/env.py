@@ -10,6 +10,7 @@ from app.common.models import Base
 from app.core.config import get_settings
 
 # Import all models so they are registered with Base.metadata
+from app.modules.recipes import models as _recipes_models  # noqa: F401
 from app.modules.users import models as _users_models  # noqa: F401
 
 config = context.config
