@@ -3,25 +3,31 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, File, UploadFile, status
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
-from app.core.dependencies import get_current_user, get_current_user_id
+from app.core.dependencies import get_current_user
 from app.modules.auth.controllers import (
+    clear_avatar_controller,
     login_controller_auth,
     me_controller_auth,
     register_controller_auth,
     set_openai_key_controller,
+    update_me_controller_auth,
+    upload_avatar_controller,
 )
 from app.modules.auth.schemas import (
     LoginRequest,
+    MeUpdateRequest,
     RegisterRequest,
     SetOpenAIKeyRequest,
     TokenResponse,
     UserMeResponse,
 )
 from app.modules.users.models import User
+from app.modules.users.repositories import get_user_by_id
 
 router = APIRouter()
 
@@ -83,6 +89,89 @@ def me(
     current_user: Annotated[User, Depends(get_current_user)],
 ):
     return me_controller_auth(db, user_id=str(current_user.id))
+
+
+@router.patch(
+    "/me",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Update current user profile",
+    description="Update display name. Avatar is set via POST /auth/me/avatar.",
+    responses={
+        204: {"description": "Updated"},
+        401: {"description": "Unauthorized"},
+        422: {"description": "Validation error"},
+    },
+    tags=["Auth"],
+)
+def update_me(
+    body: MeUpdateRequest,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    update_me_controller_auth(db, str(current_user.id), name=body.name)
+
+
+@router.get(
+    "/me/avatar",
+    summary="Get current user avatar image",
+    description="Returns the uploaded avatar image. 404 if none.",
+    responses={
+        200: {"content": {"image/*": {}}, "description": "Avatar image"},
+        404: {"description": "No avatar set"},
+    },
+    tags=["Auth"],
+)
+def get_me_avatar(
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    user = get_user_by_id(db, current_user.id)
+    if not user or not user.avatar_image:
+        return Response(status_code=status.HTTP_404_NOT_FOUND)
+    return Response(
+        content=user.avatar_image,
+        media_type=user.avatar_content_type or "image/jpeg",
+    )
+
+
+@router.post(
+    "/me/avatar",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Upload avatar image",
+    description="Upload a profile picture (JPEG, PNG, or WebP, max 2MB).",
+    responses={
+        204: {"description": "Uploaded"},
+        400: {"description": "Invalid type or too large"},
+        401: {"description": "Unauthorized"},
+        422: {"description": "Validation error"},
+    },
+    tags=["Auth"],
+)
+def upload_me_avatar(
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+    file: Annotated[UploadFile, File(description="Image file (JPEG, PNG, WebP)")],
+):
+    content_type = file.content_type or "application/octet-stream"
+    if not content_type.startswith("image/"):
+        content_type = "application/octet-stream"
+    body = file.file.read()
+    upload_avatar_controller(db, str(current_user.id), body, content_type)
+
+
+@router.delete(
+    "/me/avatar",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Remove avatar",
+    description="Delete the uploaded profile picture.",
+    responses={204: {"description": "Removed"}, 401: {"description": "Unauthorized"}},
+    tags=["Auth"],
+)
+def delete_me_avatar(
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    clear_avatar_controller(db, str(current_user.id))
 
 
 @router.patch(

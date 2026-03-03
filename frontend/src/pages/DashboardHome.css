@@ -38,8 +38,14 @@
 }
 
 .dashboard-home__card-icon {
-  font-size: 1.75rem;
   margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  color: var(--accent);
+}
+.dashboard-home__card-icon .app-icon {
+  width: 2rem;
+  height: 2rem;
 }
 
 .dashboard-home__card h2 {

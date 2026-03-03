@@ -42,6 +42,18 @@ def create_share_controller(
         share = create_share(db, recipe_id=recipe_id, shared_with_user_id=target_user_id, permission=body.permission)
     except IntegrityError:
         raise ConflictError("Recipe already shared with this user")
+    from app.modules.notifications.repositories import create_notification
+    from app.modules.users.repositories import get_user_by_id
+    owner = get_user_by_id(db, current_user_id)
+    owner_name = owner.name if owner else "Someone"
+    create_notification(
+        db,
+        target_user_id,
+        type="recipe_shared",
+        title="Recipe shared with you",
+        body=f"{owner_name} shared a recipe with you.",
+        link=f"/dashboard/recipes/{recipe_id}",
+    )
     return ShareResponse.model_validate(share)
 
 

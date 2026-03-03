@@ -57,12 +57,18 @@ def create_app() -> FastAPI:
     from app.modules.event_invites.routes import router as event_invites_router
     from app.modules.event_invites.routes import invites_router
     from app.modules.events.routes import router as events_router
+    from app.modules.friends.routes import router as friends_router
+    from app.modules.notifications.routes import router as notifications_router
     from app.modules.recipes.routes import router as recipes_router
     from app.modules.recipe_shares.routes import router as recipe_shares_router
     from app.modules.recipe_shares.routes import shared_router
+    from app.modules.users.routes import router as users_router
 
     app.include_router(ai_router, prefix="/ai", tags=["AI"])
     app.include_router(auth_router, prefix="/auth", tags=["Auth"])
+    app.include_router(users_router, prefix="/users", tags=["Users"])
+    app.include_router(friends_router, prefix="/friends", tags=["Friends"])
+    app.include_router(notifications_router, prefix="/notifications", tags=["Notifications"])
     app.include_router(recipes_router, prefix="/recipes", tags=["Recipes"])
     app.include_router(recipe_shares_router, prefix="/recipes", tags=["RecipeShares"])
     app.include_router(shared_router, prefix="/shared", tags=["RecipeShares"])

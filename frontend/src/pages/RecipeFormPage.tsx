@@ -54,6 +54,19 @@ export function RecipeFormPage() {
     return steps.filter((s) => s.trim() !== '')
   }
 
+  function addIngredient() {
+    setIngredients((prev) => [...prev, ''])
+  }
+  function removeIngredient(index: number) {
+    setIngredients((prev) => (prev.length <= 1 ? [''] : prev.filter((_, i) => i !== index)))
+  }
+  function addStep() {
+    setSteps((prev) => [...prev, ''])
+  }
+  function removeStep(index: number) {
+    setSteps((prev) => (prev.length <= 1 ? [''] : prev.filter((_, i) => i !== index)))
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const body: RecipeCreate = {
@@ -83,47 +96,47 @@ export function RecipeFormPage() {
           Description
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
         </label>
-        <label>
-          Ingredients (one per line)
-          <div className="recipe-form-page__row">
-            {ingredients.map((val, i) => (
+
+        <fieldset className="recipe-form-page__fieldset">
+          <legend>Ingredients</legend>
+          <p className="recipe-form-page__hint">Add each ingredient on its own row. Use the button below to add more.</p>
+          {ingredients.map((val, i) => (
+            <div key={i} className="recipe-form-page__row-item">
               <input
-                key={i}
                 value={val}
                 onChange={(e) => {
                   const next = [...ingredients]
                   next[i] = e.target.value
                   setIngredients(next)
                 }}
-                onBlur={() => {
-                  if (i === ingredients.length - 1 && ingredients[i]?.trim()) setIngredients([...ingredients, ''])
-                  else if (ingredients.length > 1 && !ingredients[i]?.trim())
-                    setIngredients(ingredients.filter((_, j) => j !== i))
-                }}
+                placeholder={`Ingredient ${i + 1}`}
               />
-            ))}
-          </div>
-        </label>
-        <label>
-          Steps (one per line)
-          <div className="recipe-form-page__row">
-            {steps.map((val, i) => (
+              <button type="button" className="recipe-form-page__remove" onClick={() => removeIngredient(i)} title="Remove">Remove</button>
+            </div>
+          ))}
+          <button type="button" className="recipe-form-page__add" onClick={addIngredient}>+ Add ingredient</button>
+        </fieldset>
+
+        <fieldset className="recipe-form-page__fieldset">
+          <legend>Steps</legend>
+          <p className="recipe-form-page__hint">Add each step on its own row. Use the button below to add more.</p>
+          {steps.map((val, i) => (
+            <div key={i} className="recipe-form-page__row-item">
               <input
-                key={i}
                 value={val}
                 onChange={(e) => {
                   const next = [...steps]
                   next[i] = e.target.value
                   setSteps(next)
                 }}
-                onBlur={() => {
-                  if (i === steps.length - 1 && steps[i]?.trim()) setSteps([...steps, ''])
-                  else if (steps.length > 1 && !steps[i]?.trim()) setSteps(steps.filter((_, j) => j !== i))
-                }}
+                placeholder={`Step ${i + 1}`}
               />
-            ))}
-          </div>
-        </label>
+              <button type="button" className="recipe-form-page__remove" onClick={() => removeStep(i)} title="Remove">Remove</button>
+            </div>
+          ))}
+          <button type="button" className="recipe-form-page__add" onClick={addStep}>+ Add step</button>
+        </fieldset>
+
         {error && <p className="recipe-form-page__error">Failed to save.</p>}
         <div className="recipe-form-page__actions">
           <button type="submit" className="btn-primary" disabled={loading}>{loading ? 'Saving…' : isEdit ? 'Update' : 'Create'}</button>

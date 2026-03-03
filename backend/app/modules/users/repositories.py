@@ -67,3 +67,47 @@ def has_openai_key(db: Session, user_id: str | uuid.UUID) -> bool:
     """Whether user has a stored OpenAI key (for openai_configured in /me)."""
     user = get_user_by_id(db, user_id)
     return bool(user and user.encrypted_openai_api_key)
+
+
+def update_user_profile(
+    db: Session,
+    user_id: str | uuid.UUID,
+    *,
+    name: str | None = None,
+    avatar_url: str | None = None,
+) -> None:
+    """Update user profile fields. None means leave unchanged."""
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return
+    if name is not None:
+        user.name = name
+    if avatar_url is not None:
+        user.avatar_url = avatar_url if avatar_url else None
+    db.commit()
+
+
+def set_avatar_image(
+    db: Session,
+    user_id: str | uuid.UUID,
+    image_bytes: bytes,
+    content_type: str,
+) -> None:
+    """Store uploaded avatar image and content type. Clears avatar_url when setting image."""
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return
+    user.avatar_image = image_bytes
+    user.avatar_content_type = content_type
+    user.avatar_url = None  # prefer stored image over URL
+    db.commit()
+
+
+def clear_avatar_image(db: Session, user_id: str | uuid.UUID) -> None:
+    """Remove stored avatar image."""
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return
+    user.avatar_image = None
+    user.avatar_content_type = None
+    db.commit()

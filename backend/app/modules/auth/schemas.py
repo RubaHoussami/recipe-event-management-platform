@@ -27,6 +27,11 @@ class UserMeResponse(BaseModel):
     role: str
     created_at: str
     openai_configured: bool = Field(False, description="True if user has stored an OpenAI key (key never returned)")
+    has_avatar: bool = Field(False, description="True if user has an uploaded avatar (fetch from GET /auth/me/avatar)")
+
+
+class MeUpdateRequest(BaseModel):
+    name: str | None = Field(None, min_length=1, max_length=255)
 
 
 class SetOpenAIKeyRequest(BaseModel):

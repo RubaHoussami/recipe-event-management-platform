@@ -12,6 +12,8 @@ from app.core.config import get_settings
 # Import all models so they are registered with Base.metadata
 from app.modules.event_invites import models as _event_invites_models  # noqa: F401
 from app.modules.events import models as _events_models  # noqa: F401
+from app.modules.friends import models as _friends_models  # noqa: F401
+from app.modules.notifications import models as _notifications_models  # noqa: F401
 from app.modules.recipe_shares import models as _recipe_shares_models  # noqa: F401
 from app.modules.recipes import models as _recipes_models  # noqa: F401
 from app.modules.users import models as _users_models  # noqa: F401

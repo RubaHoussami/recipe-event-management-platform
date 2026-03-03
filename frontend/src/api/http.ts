@@ -1,4 +1,4 @@
-const API_BASE = '/api'
+export const API_BASE = '/api'
 
 export type ApiError = { status?: number; detail: unknown }
 
@@ -11,7 +11,7 @@ function onUnauthorized(): void {
   window.location.replace('/')
 }
 
-function getAuthHeader(): string | undefined {
+export function getAuthHeader(): string | undefined {
   const token = localStorage.getItem('access_token')
   return token ? `Bearer ${token}` : undefined
 }

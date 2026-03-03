@@ -32,6 +32,56 @@
   margin-bottom: 1rem;
 }
 
+.settings-page__avatar-section {
+  margin-bottom: 1.5rem;
+}
+.settings-page__avatar-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+.settings-page__avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.settings-page__avatar-preview {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.settings-page__avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.settings-page__avatar-placeholder {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.settings-page__avatar-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.settings-page__file-input {
+  position: absolute;
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
 .settings-page__form label {
   display: flex;
   flex-direction: column;

@@ -79,6 +79,21 @@ def respond_controller(
     if not user_can_respond_to_invite(invite, current_user_id, current_user_email):
         raise ForbiddenError("This invite is not for you")
     updated = update_invite_status(db, invite, status)
+    if status == "accepted":
+        event = get_event_by_id(db, invite.event_id)
+        if event:
+            from app.modules.notifications.repositories import create_notification
+            from app.modules.users.repositories import get_user_by_id
+            accepter = get_user_by_id(db, current_user_id)
+            accepter_name = accepter.name if accepter else current_user_email
+            create_notification(
+                db,
+                event.owner_id,
+                type="event_invite_accepted",
+                title="Event invite accepted",
+                body=f"{accepter_name} accepted your invite to \"{event.title}\".",
+                link=f"/dashboard/events/{event.id}",
+            )
     return InviteResponse.model_validate(updated)
 
 

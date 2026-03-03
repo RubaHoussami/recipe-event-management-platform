@@ -8,6 +8,8 @@ import { EventsPage } from './pages/EventsPage'
 import { EventsNewPage } from './pages/EventsNewPage'
 import { DashboardHome } from './pages/DashboardHome'
 import { SettingsPage } from './pages/SettingsPage'
+import { FriendsPage } from './pages/FriendsPage'
+import { NotificationsPage } from './pages/NotificationsPage'
 
 const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
@@ -22,6 +24,8 @@ const router = createBrowserRouter([
       { path: 'recipes/:id/edit', element: <RecipeFormPage /> },
       { path: 'events', element: <EventsPage /> },
       { path: 'events/new', element: <EventsNewPage /> },
+      { path: 'friends', element: <FriendsPage /> },
+      { path: 'notifications', element: <NotificationsPage /> },
       { path: 'settings', element: <SettingsPage /> },
     ],
   },
