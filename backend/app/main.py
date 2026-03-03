@@ -54,9 +54,13 @@ def create_app() -> FastAPI:
     # ---------- Auth (public: register, login; protected: me) ----------
     from app.modules.auth.routes import router as auth_router
     from app.modules.recipes.routes import router as recipes_router
+    from app.modules.recipe_shares.routes import router as recipe_shares_router
+    from app.modules.recipe_shares.routes import shared_router
 
     app.include_router(auth_router, prefix="/auth", tags=["Auth"])
     app.include_router(recipes_router, prefix="/recipes", tags=["Recipes"])
+    app.include_router(recipe_shares_router, prefix="/recipes", tags=["RecipeShares"])
+    app.include_router(shared_router, prefix="/shared", tags=["RecipeShares"])
 
     return app
 

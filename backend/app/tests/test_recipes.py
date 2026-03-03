@@ -73,3 +73,34 @@ def test_delete_recipe(client: TestClient, auth_headers: dict[str, str]) -> None
     assert r.status_code == 204
     r2 = client.get(f"/recipes/{recipe_id}", headers=auth_headers)
     assert r2.status_code == 404
+
+
+def test_shared_viewer_cannot_edit(client: TestClient) -> None:
+    """Owner shares recipe with viewer; viewer can get but not patch."""
+    client.post(
+        "/auth/register",
+        json={"email": "owner@example.com", "name": "Owner", "password": "password123"},
+    )
+    client.post(
+        "/auth/register",
+        json={"email": "viewer@example.com", "name": "Viewer", "password": "password123"},
+    )
+    owner_r = client.post("/auth/login", json={"email": "owner@example.com", "password": "password123"})
+    viewer_r = client.post("/auth/login", json={"email": "viewer@example.com", "password": "password123"})
+    owner_headers = {"Authorization": f"Bearer {owner_r.json()['access_token']}"}
+    viewer_headers = {"Authorization": f"Bearer {viewer_r.json()['access_token']}"}
+    cr = client.post(
+        "/recipes/",
+        json={"title": "Shared Recipe", "ingredients": [], "steps": []},
+        headers=owner_headers,
+    )
+    recipe_id = cr.json()["id"]
+    client.post(
+        f"/recipes/{recipe_id}/shares",
+        json={"shared_with_email": "viewer@example.com", "permission": "viewer"},
+        headers=owner_headers,
+    )
+    get_r = client.get(f"/recipes/{recipe_id}", headers=viewer_headers)
+    assert get_r.status_code == 200
+    patch_r = client.patch(f"/recipes/{recipe_id}", json={"title": "Hacked"}, headers=viewer_headers)
+    assert patch_r.status_code == 403
