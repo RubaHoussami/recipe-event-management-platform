@@ -82,7 +82,7 @@ export function FriendsPage() {
                     {f.friend_name && <span className="friends-page__email">{f.friend_email}</span>}
                   </div>
                 </div>
-                <button type="button" className="btn-secondary friends-page__remove" onClick={() => removeMutation.mutate(f.friend_id)} disabled={removeMutation.isPending}>
+                <button type="button" className="btn-delete" onClick={() => removeMutation.mutate(f.friend_id)} disabled={removeMutation.isPending}>
                   Remove
                 </button>
               </li>

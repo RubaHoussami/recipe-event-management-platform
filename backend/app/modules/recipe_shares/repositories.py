@@ -65,12 +65,24 @@ def get_recipes_shared_with_user(
     user_id: uuid.UUID,
     limit: int = 20,
     offset: int = 0,
-) -> tuple[list[Recipe], int]:
-    """Recipes shared with this user (via recipe_shares)."""
+) -> tuple[list[tuple[Recipe, str]], int]:
+    """Recipes shared with this user (via recipe_shares), with permission. Returns list of (Recipe, permission)."""
     uid = user_id if isinstance(user_id, uuid.UUID) else uuid.UUID(user_id)
-    subq = select(RecipeShare.recipe_id).where(RecipeShare.shared_with_user_id == uid)
-    base = select(Recipe).where(Recipe.id.in_(subq))
-    total = db.execute(select(func.count()).select_from(base.subquery())).scalar() or 0
-    stmt = base.order_by(Recipe.updated_at.desc()).limit(limit).offset(offset)
-    items = list(db.execute(stmt).scalars().all())
-    return items, total
+    subq = (
+        select(RecipeShare.recipe_id, RecipeShare.permission)
+        .where(RecipeShare.shared_with_user_id == uid)
+    )
+    subq_alias = subq.subquery()
+    stmt = (
+        select(Recipe, subq_alias.c.permission)
+        .join(subq_alias, Recipe.id == subq_alias.c.recipe_id)
+        .order_by(Recipe.updated_at.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    rows = list(db.execute(stmt).all())
+    count_stmt = select(func.count()).select_from(
+        select(RecipeShare.recipe_id).where(RecipeShare.shared_with_user_id == uid).subquery()
+    )
+    total = db.execute(count_stmt).scalar() or 0
+    return rows, total

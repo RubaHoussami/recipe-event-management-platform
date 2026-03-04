@@ -1,0 +1,137 @@
+.event-form-page__back {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.9375rem;
+}
+.event-form-page__back:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.event-form-page h1 {
+  margin: 0 0 1.25rem;
+}
+
+.event-form-page form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem 0;
+}
+
+.event-form-page label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  color: var(--text);
+}
+
+.event-form-page input,
+.event-form-page textarea {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9375rem;
+}
+
+.event-form-page textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.event-form-page__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+@media (max-width: 560px) {
+  .event-form-page__row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.event-form-page__fieldset {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  margin: 0;
+}
+.event-form-page__fieldset legend {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--text);
+  padding: 0 0.5rem;
+}
+.event-form-page__hint {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0 0 0.75rem !important;
+}
+.event-form-page__row-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.event-form-page__row-item input {
+  flex: 1;
+  min-width: 0;
+}
+.event-form-page__remove {
+  flex-shrink: 0;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.875rem;
+  background: transparent;
+  border: 1px solid var(--error);
+  color: var(--error);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.event-form-page__remove:hover {
+  background: var(--error-bg);
+  color: var(--error);
+  border-color: var(--error);
+}
+.event-form-page__add {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9375rem;
+  background: var(--accent-bg);
+  border: 1px dashed var(--accent);
+  color: var(--accent);
+  font-weight: 500;
+}
+.event-form-page__add:hover {
+  background: var(--accent-soft);
+  border-style: solid;
+}
+
+.event-form-page__invited-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+}
+.event-form-page__invited-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  padding: 0.35rem 0;
+  font-size: 0.9375rem;
+}
+
+.event-form-page__error {
+  margin: 0;
+  color: var(--error);
+  font-size: 0.9rem;
+}
+
+.event-form-page__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}

@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getToken } from '../api/http'
 import { getMe, logout } from '../api/auth'
+import { listNotifications } from '../api/notifications'
 import type { UserMe } from '../api/auth'
 import { useMyAvatarUrl } from '../hooks/useMyAvatarUrl'
 import { useTheme } from '../contexts/ThemeContext'
@@ -17,6 +18,8 @@ import {
   IconNotifications,
   IconRecipes,
   IconSettings,
+  IconShare,
+  IconSparkles,
 } from '../components/Icons'
 import './DashboardLayout.css'
 
@@ -30,6 +33,13 @@ export function DashboardLayout() {
     queryFn: getMe,
     enabled: hasToken,
   })
+  const { data: notifications } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: listNotifications,
+    enabled: hasToken,
+    refetchInterval: 15_000,
+  })
+  const unreadNotificationCount = notifications?.filter((n) => !n.read_at).length ?? 0
   const avatarUrl = useMyAvatarUrl(user ?? null)
 
   useEffect(() => {
@@ -60,7 +70,14 @@ export function DashboardLayout() {
           <button type="button" className="dashboard__theme-toggle" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Light mode' : 'Dark mode'} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
             {theme === 'dark' ? <IconLightMode className="app-icon icon--sm" /> : <IconDarkMode className="app-icon icon--sm" />}
           </button>
-          <NavLink to="/dashboard/notifications" className="dashboard__notifications" aria-label="Notifications"><IconNotifications className="app-icon icon--sm" /></NavLink>
+          <NavLink to="/dashboard/notifications" className="dashboard__notifications" aria-label="Notifications">
+            <span className="dashboard__notifications-wrap">
+              <IconNotifications className="app-icon icon--sm" />
+              {unreadNotificationCount > 0 && (
+                <span className="dashboard__badge" aria-hidden>{unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}</span>
+              )}
+            </span>
+          </NavLink>
           <NavLink to="/dashboard/friends" className="dashboard__friends" aria-label="Friends"><IconFriends className="app-icon icon--sm" /></NavLink>
           <span className="dashboard__user" title={user?.email ?? ''}>
             <span className="dashboard__user-name">{(user?.name || user?.email) ?? '—'}</span>
@@ -74,7 +91,7 @@ export function DashboardLayout() {
             <div className="dashboard__nav-sections">
               <div className="dashboard__nav-section">
                 <div className="dashboard__nav-label">Main</div>
-                <NavLink to="/dashboard" className={({ isActive }) => `dashboard__nav-link dashboard__nav-link--parent ${isActive ? 'active' : ''}`}>
+                <NavLink to="/dashboard" className={({ isActive }) => `dashboard__nav-link ${isActive ? 'active' : ''}`}>
                   <IconHome className="app-icon" /><span className="dashboard__nav-link-text">Home</span>
                 </NavLink>
               </div>
@@ -83,8 +100,11 @@ export function DashboardLayout() {
                 <NavLink to="/dashboard/recipes" className={({ isActive }) => `dashboard__nav-link ${isActive && path === '/dashboard/recipes' ? 'active' : ''}`}>
                   <IconRecipes className="app-icon" /><span className="dashboard__nav-link-text">All recipes</span>
                 </NavLink>
-                <NavLink to="/dashboard/recipes/new" className={({ isActive }) => `dashboard__nav-link ${isActive ? 'active' : ''}`}>
+                <NavLink to="/dashboard/recipes/new" end className={`dashboard__nav-link ${path === '/dashboard/recipes/new' ? 'active' : ''}`}>
                   <IconAdd className="app-icon" /><span className="dashboard__nav-link-text">New recipe</span>
+                </NavLink>
+                <NavLink to="/dashboard/recipes/new/parse" className={`dashboard__nav-link ${path === '/dashboard/recipes/new/parse' ? 'active' : ''}`}>
+                  <IconSparkles className="app-icon" /><span className="dashboard__nav-link-text">Parse recipe</span>
                 </NavLink>
               </div>
               <div className="dashboard__nav-section">
@@ -98,11 +118,20 @@ export function DashboardLayout() {
               </div>
               <div className="dashboard__nav-section">
                 <div className="dashboard__nav-label">Social</div>
+                <NavLink to="/dashboard/shared" className={({ isActive }) => `dashboard__nav-link ${isActive ? 'active' : ''}`}>
+                  <IconShare className="app-icon" /><span className="dashboard__nav-link-text">Shared with you</span>
+                </NavLink>
                 <NavLink to="/dashboard/friends" className={({ isActive }) => `dashboard__nav-link ${isActive ? 'active' : ''}`}>
                   <IconFriends className="app-icon" /><span className="dashboard__nav-link-text">Friends</span>
                 </NavLink>
                 <NavLink to="/dashboard/notifications" className={({ isActive }) => `dashboard__nav-link ${isActive ? 'active' : ''}`}>
-                  <IconNotifications className="app-icon" /><span className="dashboard__nav-link-text">Notifications</span>
+                  <span className="dashboard__nav-link-with-badge">
+                    <IconNotifications className="app-icon" />
+                    <span className="dashboard__nav-link-text">Notifications</span>
+                    {unreadNotificationCount > 0 && (
+                      <span className="dashboard__nav-badge" aria-hidden>{unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}</span>
+                    )}
+                  </span>
                 </NavLink>
               </div>
             </div>

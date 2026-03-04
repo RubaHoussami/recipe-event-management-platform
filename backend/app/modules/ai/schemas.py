@@ -16,9 +16,12 @@ class ParseRecipeRequest(BaseModel):
 
 
 class ParseRecipeResponse(BaseModel):
-    title: str = Field(..., description="Parsed recipe title")
-    ingredients: list[str] = Field(default_factory=list, description="List of ingredients")
-    steps: list[str] = Field(default_factory=list, description="List of steps")
+    title: str | None = Field(None, description="Parsed recipe title, or null if parsing failed")
+    description: str | None = Field(None, description="Parsed description if present")
+    ingredients: list[str] | None = Field(None, description="List of ingredients, or null if parsing failed")
+    steps: list[str] | None = Field(None, description="List of steps, or null if parsing failed")
+    cuisine: str | None = Field(None, description="Parsed cuisine if present")
+    share_with: list[str] | None = Field(None, description="Parsed email addresses to share with, if mentioned in text")
 
 
 class ParseEventRequest(BaseModel):

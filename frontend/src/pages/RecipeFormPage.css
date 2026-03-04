@@ -1,5 +1,5 @@
 .recipe-form-page {
-  max-width: 520px;
+  width: 100%;
 }
 
 .recipe-form-page__back {
@@ -14,6 +14,44 @@
 
 .recipe-form-page h1 {
   margin: 0 0 1.25rem;
+}
+.recipe-form-page__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.recipe-form-page__title-row h1 {
+  margin: 0;
+}
+.recipe-form-page__parse-link {
+  text-decoration: none;
+}
+.recipe-form-page__parse-link:hover {
+  text-decoration: none;
+}
+
+.recipe-form-page__cuisine-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  width: 100%;
+}
+.recipe-form-page__cuisine-row > span {
+  text-align: left;
+}
+.recipe-form-page__cuisine-row input {
+  width: 100%;
+  box-sizing: border-box;
+}
+.recipe-form-page__cuisine-row .recipe-form-page__detect-cuisine {
+  margin-top: 0.25rem;
+}
+.recipe-form-page__detect-cuisine--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .recipe-form-page form {
@@ -72,18 +110,26 @@
   flex: 1;
   min-width: 0;
 }
+.recipe-form-page__share-row .recipe-form-page__permission-select {
+  flex-shrink: 0;
+  min-width: 6rem;
+  padding: 0.4rem 0.5rem;
+}
 .recipe-form-page__remove {
   flex-shrink: 0;
   padding: 0.4rem 0.65rem;
   font-size: 0.875rem;
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
-  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--error);
+  color: var(--error);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .recipe-form-page__remove:hover {
+  background: var(--error-bg);
   color: var(--error);
   border-color: var(--error);
-  background: var(--error-bg);
 }
 .recipe-form-page__add {
   margin-top: 0.5rem;
@@ -97,6 +143,24 @@
 .recipe-form-page__add:hover {
   background: var(--accent-soft);
   border-style: solid;
+}
+
+.recipe-form-page__shared-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+}
+.recipe-form-page__shared-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  padding: 0.35rem 0;
+  font-size: 0.9375rem;
+}
+.recipe-form-page__shared-permission {
+  color: var(--text-muted);
+  font-size: 0.875rem;
 }
 
 .recipe-form-page__actions {

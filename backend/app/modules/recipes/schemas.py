@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 class RecipeCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=500)
     description: str | None = None
+    cuisine: str | None = Field(None, max_length=100)
     ingredients: list[str] = Field(default_factory=list)
     steps: list[str] = Field(default_factory=list)
 
@@ -35,6 +36,7 @@ class RecipeResponse(BaseModel):
     statuses: list[str] = Field(default_factory=list, description="Statuses: favorite, to_try, made_before (populated in GET single)")
     created_at: datetime
     updated_at: datetime
+    access: str | None = Field(None, description="Current user's access: owner, editor, or viewer (only in GET single)")
 
     model_config = {"from_attributes": True}
 

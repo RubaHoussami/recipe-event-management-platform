@@ -1,6 +1,9 @@
 import { useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import { parseRecipe } from '../api/ai'
 import { createRecipe } from '../api/recipes'
+import type { UserMe } from '../api/auth'
+import { AlertModal, getApiKeyErrorDetail } from './AlertModal'
 import './modal.css'
 
 interface ParseRecipeModalProps {
@@ -9,11 +12,13 @@ interface ParseRecipeModalProps {
 }
 
 export function ParseRecipeModal({ onClose, onCreated }: ParseRecipeModalProps) {
+  const { user } = useOutletContext<{ user: UserMe | null }>()
   const [freeText, setFreeText] = useState('')
   const [useOpenai, setUseOpenai] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [parsed, setParsed] = useState<{ title: string; ingredients: string[]; steps: string[] } | null>(null)
+  const [apiKeyError, setApiKeyError] = useState<string | null>(null)
 
   async function handleParse(e: React.FormEvent) {
     e.preventDefault()
@@ -24,7 +29,9 @@ export function ParseRecipeModal({ onClose, onCreated }: ParseRecipeModalProps) 
       const res = await parseRecipe(freeText, useOpenai)
       setParsed(res)
     } catch (err: unknown) {
-      setError(err && typeof err === 'object' && 'detail' in err ? String((err as { detail: unknown }).detail) : 'Parse failed')
+      const apiKeyMsg = getApiKeyErrorDetail(err)
+      if (apiKeyMsg) setApiKeyError(apiKeyMsg)
+      else setError(err && typeof err === 'object' && 'detail' in err ? String((err as { detail: unknown }).detail) : 'Parse failed')
     } finally {
       setLoading(false)
     }
@@ -64,8 +71,16 @@ export function ParseRecipeModal({ onClose, onCreated }: ParseRecipeModalProps) 
             rows={5}
             required
           />
-          <label>
-            <input type="checkbox" checked={useOpenai} onChange={(e) => setUseOpenai(e.target.checked)} />
+          <label
+            className={!user?.openai_configured ? 'modal__label--disabled' : ''}
+            title={!user?.openai_configured ? 'To use this, add API key in Settings' : undefined}
+          >
+            <input
+              type="checkbox"
+              checked={useOpenai}
+              onChange={(e) => user?.openai_configured && setUseOpenai(e.target.checked)}
+              disabled={!user?.openai_configured}
+            />
             Use OpenAI (if configured)
           </label>
           <button type="submit" disabled={loading}>Parse</button>
@@ -79,6 +94,13 @@ export function ParseRecipeModal({ onClose, onCreated }: ParseRecipeModalProps) 
           </div>
         )}
       </div>
+      {apiKeyError && (
+        <AlertModal
+          title="OpenAI API key"
+          message={apiKeyError}
+          onClose={() => setApiKeyError(null)}
+        />
+      )}
     </div>
   )
 }

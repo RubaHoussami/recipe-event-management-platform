@@ -37,13 +37,25 @@ def suggest_recipes_with_openai(cuisine: str, openai_api_key: str) -> SuggestRec
 
 
 def parse_recipe(free_text: str, use_openai: bool = False, openai_api_key: str | None = None) -> ParseRecipeResponse:
-    """Use OpenAI for this request only when use_openai is True and openai_api_key is non-empty."""
-    if use_openai and openai_api_key and openai_api_key.strip():
-        provider = OpenAIProvider(api_key=openai_api_key.strip())
-    else:
-        provider = get_provider()
-    title, ingredients, steps = provider.parse_recipe(free_text)
-    return ParseRecipeResponse(title=title, ingredients=ingredients, steps=steps)
+    """Use OpenAI for this request only when use_openai is True and openai_api_key is non-empty. Returns null for fields that fail to parse."""
+    try:
+        if use_openai and openai_api_key and openai_api_key.strip():
+            provider = OpenAIProvider(api_key=openai_api_key.strip())
+        else:
+            provider = get_provider()
+        title, ingredients, steps, description, cuisine, share_with = provider.parse_recipe(free_text)
+        return ParseRecipeResponse(
+            title=title if title else None,
+            description=description,
+            ingredients=ingredients if ingredients is not None else None,
+            steps=steps if steps is not None else None,
+            cuisine=cuisine,
+            share_with=share_with,
+        )
+    except Exception:
+        return ParseRecipeResponse(
+            title=None, description=None, ingredients=None, steps=None, cuisine=None, share_with=None
+        )
 
 
 def parse_event(free_text: str, use_openai: bool = False, openai_api_key: str | None = None) -> ParseEventResponse:

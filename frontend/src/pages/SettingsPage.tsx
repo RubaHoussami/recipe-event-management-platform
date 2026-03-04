@@ -90,9 +90,25 @@ export function SettingsPage() {
     try {
       await setOpenAIKey(openaiKey.trim() || null)
       setOpenaiKeyLocal('')
-      setMessage({ type: 'success', text: 'Settings saved. AI features will use your key when provided.' })
+      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+      setMessage({ type: 'success', text: openaiKey.trim() ? 'Settings saved. AI features will use your key when provided.' : 'OpenAI key cleared.' })
     } catch {
       setMessage({ type: 'error', text: 'Failed to save. Please try again.' })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleClearKey() {
+    setMessage(null)
+    setSaving(true)
+    try {
+      await setOpenAIKey(null)
+      setOpenaiKeyLocal('')
+      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+      setMessage({ type: 'success', text: 'OpenAI key cleared.' })
+    } catch {
+      setMessage({ type: 'error', text: 'Failed to clear key.' })
     } finally {
       setSaving(false)
     }
@@ -106,38 +122,42 @@ export function SettingsPage() {
 
       <div className="card settings-page__section">
         <h2>Profile</h2>
-        <dl className="settings-page__profile">
-          <dt>Email</dt>
-          <dd>{user?.email ?? '—'}</dd>
-          <dt>Role</dt>
-          <dd>{user?.role ?? '—'}</dd>
-        </dl>
-        <div className="settings-page__avatar-section">
-          <span className="settings-page__avatar-label">Profile picture</span>
-          <div className="settings-page__avatar-row">
-            <div className="settings-page__avatar-preview">
-              {avatarUrl ? <img src={avatarUrl} alt="" /> : <span className="settings-page__avatar-placeholder">{(user?.name || user?.email || '?')[0].toUpperCase()}</span>}
-            </div>
-            <div className="settings-page__avatar-actions">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept={ALLOWED_TYPES}
-                onChange={handleAvatarChange}
-                className="settings-page__file-input"
-                aria-label="Upload profile picture"
-              />
-              <button type="button" className="btn-secondary" onClick={() => fileInputRef.current?.click()} disabled={avatarSaving}>
-                {avatarSaving ? 'Uploading…' : 'Upload image'}
-              </button>
-              {user?.has_avatar && (
-                <button type="button" className="btn-secondary" onClick={handleRemoveAvatar} disabled={avatarSaving}>
-                  Remove
-                </button>
-              )}
-            </div>
+        <div className="settings-page__profile-block">
+          <div className="settings-page__profile-info">
+            <dl className="settings-page__profile">
+              <dt>Email</dt>
+              <dd>{user?.email ?? '—'}</dd>
+              <dt>Role</dt>
+              <dd>{user?.role ?? '—'}</dd>
+            </dl>
           </div>
-          <p className="settings-page__hint">JPEG, PNG or WebP, max {MAX_AVATAR_MB}MB.</p>
+          <div className="settings-page__avatar-section">
+            <span className="settings-page__avatar-label">Profile picture</span>
+            <div className="settings-page__avatar-row">
+              <div className="settings-page__avatar-preview">
+                {avatarUrl ? <img src={avatarUrl} alt="" /> : <span className="settings-page__avatar-placeholder">{(user?.name || user?.email || '?')[0].toUpperCase()}</span>}
+              </div>
+              <div className="settings-page__avatar-actions">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={ALLOWED_TYPES}
+                  onChange={handleAvatarChange}
+                  className="settings-page__file-input"
+                  aria-label="Upload profile picture"
+                />
+                <button type="button" className="btn-secondary settings-page__btn-upload" onClick={() => fileInputRef.current?.click()} disabled={avatarSaving}>
+                  {avatarSaving ? 'Uploading…' : 'Upload image'}
+                </button>
+                {user?.has_avatar && (
+                  <button type="button" className="btn-delete settings-page__btn-remove" onClick={handleRemoveAvatar} disabled={avatarSaving}>
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
+            <p className="settings-page__hint">JPEG, PNG or WebP, max {MAX_AVATAR_MB}MB.</p>
+          </div>
         </div>
         <form onSubmit={handleSaveProfile} className="settings-page__form">
           <label>
@@ -151,9 +171,9 @@ export function SettingsPage() {
       </div>
 
       <div className="card settings-page__section">
-        <h2>AI (OpenAI)</h2>
+        <h2>OpenAI API Key</h2>
         <p className="settings-page__hint">
-          Add your OpenAI API key to enable “Parse from text” and other AI features. Your key is stored securely and never sent to our servers except to call OpenAI when you use those features.
+          Add your OpenAI API key to enable “Parse recipe” and other AI features. Your key is stored securely and never used by our servers except to call OpenAI when you use those features.
         </p>
         <form onSubmit={handleSaveKey} className="settings-page__form">
           <label>
@@ -170,8 +190,8 @@ export function SettingsPage() {
             <button type="submit" className="btn-primary" disabled={saving}>
               {saving ? 'Saving…' : 'Save'}
             </button>
-            <button type="button" className="btn-secondary" onClick={() => setOpenaiKeyLocal('')}>
-              Clear
+            <button type="button" className="btn-delete" onClick={handleClearKey} disabled={saving}>
+              Clear key
             </button>
           </div>
         </form>

@@ -1,0 +1,91 @@
+.invite-respond-page {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.invite-respond-page__card {
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.invite-respond-page h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.invite-respond-page__subtitle {
+  margin: 0 0 0.25rem;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+}
+
+.invite-respond-page__event-title {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+}
+
+.invite-respond-page__dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 1.5rem;
+  margin: 0 0 1rem;
+}
+
+.invite-respond-page__dl dt {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.invite-respond-page__dl dd {
+  margin: 0;
+}
+
+.invite-respond-page__description {
+  margin-bottom: 1rem;
+}
+
+.invite-respond-page__description h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+}
+
+.invite-respond-page__description p {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 0.9375rem;
+}
+
+.invite-respond-page__status {
+  margin: 0 0 1rem;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+}
+
+.invite-respond-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.invite-respond-page__back {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.invite-respond-page__back:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.invite-respond-page__loading,
+.invite-respond-page__error {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.invite-respond-page__error {
+  color: var(--error);
+}

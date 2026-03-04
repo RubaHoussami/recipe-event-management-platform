@@ -61,3 +61,38 @@ def get_invite_by_event_and_email(db: Session, event_id: uuid.UUID, email: str) 
             EventInvite.invited_email == email.strip().lower(),
         )
     ).scalar_one_or_none()
+
+
+def get_invite_by_id(db: Session, invite_id: uuid.UUID) -> EventInvite | None:
+    return db.execute(select(EventInvite).where(EventInvite.id == invite_id)).scalar_one_or_none()
+
+
+def delete_invite(db: Session, invite: EventInvite) -> None:
+    db.delete(invite)
+    db.commit()
+
+
+def get_invites_for_user(
+    db: Session,
+    user_id: uuid.UUID,
+    user_email: str,
+    *,
+    limit: int = 50,
+    offset: int = 0,
+) -> list[EventInvite]:
+    """Return invites where user is the invitee (by user_id or email)."""
+    from sqlalchemy import or_
+    uid = user_id if isinstance(user_id, uuid.UUID) else uuid.UUID(user_id)
+    email = (user_email or "").strip().lower()
+    if email:
+        cond = or_(EventInvite.invited_user_id == uid, EventInvite.invited_email == email)
+    else:
+        cond = EventInvite.invited_user_id == uid
+    stmt = (
+        select(EventInvite)
+        .where(cond)
+        .order_by(EventInvite.created_at.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    return list(db.execute(stmt).scalars().all())

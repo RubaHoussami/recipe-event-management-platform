@@ -1,9 +1,12 @@
 import { apiRequest } from './http'
 
 export interface ParseRecipeResponse {
-  title: string
-  ingredients: string[]
-  steps: string[]
+  title: string | null
+  description?: string | null
+  ingredients: string[] | null
+  steps: string[] | null
+  cuisine?: string | null
+  share_with?: string[] | null
 }
 
 export function parseRecipe(freeText: string, useOpenai: boolean = false): Promise<ParseRecipeResponse> {

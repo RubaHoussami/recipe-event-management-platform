@@ -6,6 +6,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, model_validator
 
+from app.modules.recipes.schemas import RecipeResponse
+
 
 class ShareCreate(BaseModel):
     shared_with_email: str | None = Field(None, description="Email of user to share with")
@@ -33,3 +35,10 @@ class ShareResponse(BaseModel):
 
 class ShareResponseWithEmail(ShareResponse):
     shared_with_email: str | None = None
+
+
+class SharedRecipeItem(BaseModel):
+    """Recipe plus permission when listing shared-with-me."""
+
+    recipe: RecipeResponse
+    permission: str = Field(..., pattern="^(viewer|editor)$")

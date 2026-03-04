@@ -9,6 +9,7 @@ export function NotificationsPage() {
   const { data: notifications, isLoading } = useQuery({
     queryKey: ['notifications'],
     queryFn: () => listNotifications(),
+    refetchInterval: 15_000,
   })
 
   const markReadMutation = useMutation({

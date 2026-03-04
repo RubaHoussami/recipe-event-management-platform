@@ -16,7 +16,7 @@ from app.modules.recipe_shares.controllers import (
     list_shares_controller,
     list_shared_recipes_controller,
 )
-from app.modules.recipe_shares.schemas import ShareCreate, ShareResponse
+from app.modules.recipe_shares.schemas import ShareCreate, ShareResponse, ShareResponseWithEmail, SharedRecipeItem
 from app.modules.recipes.schemas import RecipeResponse
 from app.modules.users.models import User
 
@@ -50,7 +50,7 @@ def create_share(
 
 @router.get(
     "/{recipe_id}/shares",
-    response_model=list[ShareResponse],
+    response_model=list[ShareResponseWithEmail],
     summary="List shares for recipe",
     responses={200: {"description": "OK"}, 401: {"description": "Unauthorized"}, 403: {"description": "Forbidden"}, 404: {"description": "Not found"}},
     tags=["RecipeShares"],
@@ -81,7 +81,7 @@ def delete_share(
 
 @shared_router.get(
     "/recipes",
-    response_model=PaginatedResponse[RecipeResponse],
+    response_model=PaginatedResponse[SharedRecipeItem],
     summary="List recipes shared with current user",
     responses={200: {"description": "OK"}, 401: {"description": "Unauthorized"}},
     tags=["RecipeShares"],

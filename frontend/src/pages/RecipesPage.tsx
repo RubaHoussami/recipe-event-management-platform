@@ -17,7 +17,10 @@ export function RecipesPage() {
     <div className="recipes-page">
       <div className="page-header">
         <h1>Recipes</h1>
-        <Link to="/dashboard/recipes/new" className="btn-primary recipes-page__new">New recipe</Link>
+        <div className="recipes-page__header-actions">
+          <Link to="/dashboard/recipes/new" className="btn-primary recipes-page__new">New recipe</Link>
+          <Link to="/dashboard/recipes/new/parse" className="btn-secondary">Parse recipe</Link>
+        </div>
       </div>
       <div className="recipes-page__toolbar">
         <input

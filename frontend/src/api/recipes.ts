@@ -12,6 +12,8 @@ export interface Recipe {
   statuses?: string[]
   created_at: string
   updated_at: string
+  /** Current user's access: owner, editor, or viewer (only in GET single). */
+  access?: 'owner' | 'editor' | 'viewer'
 }
 
 export interface Paginated<T> {
@@ -24,6 +26,7 @@ export interface Paginated<T> {
 export interface RecipeCreate {
   title: string
   description?: string | null
+  cuisine?: string | null
   ingredients: string[]
   steps: string[]
 }

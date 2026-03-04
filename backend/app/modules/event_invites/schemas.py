@@ -6,6 +6,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, EmailStr, Field
 
+from app.modules.events.schemas import EventResponse
+
 
 class InviteCreate(BaseModel):
     invited_email: EmailStr
@@ -38,3 +40,26 @@ class AttendeeItem(BaseModel):
 class AttendeesResponse(BaseModel):
     owner: AttendeeItem
     invitees: list[AttendeeItem]
+
+
+class EventSummary(BaseModel):
+    """Minimal event info for invite listing."""
+    id: uuid.UUID
+    title: str
+    start_time: datetime
+    end_time: datetime | None
+    location: str | None
+
+    model_config = {"from_attributes": True}
+
+
+class MyInviteWithEvent(BaseModel):
+    """Invite plus event summary for 'shared with me' listing."""
+    invite: InviteResponse
+    event: EventSummary
+
+
+class MyInviteDetailResponse(BaseModel):
+    """Single invite by token (for respond page): invite + event."""
+    invite: InviteResponse
+    event: EventResponse

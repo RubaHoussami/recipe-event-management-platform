@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { login, register } from '../api/auth'
 import { getToken } from '../api/http'
 import { useTheme } from '../contexts/ThemeContext'
-import { IconDarkMode, IconEvents, IconLightMode, IconRecipes, IconShare, IconSparkles } from '../components/Icons'
+import { IconDarkMode, IconEvents, IconFriends, IconLightMode, IconNotifications, IconPerson, IconRecipes, IconShare, IconSparkles } from '../components/Icons'
 import './LandingPage.css'
 
 type Tab = 'login' | 'signup'
@@ -100,7 +100,7 @@ export function LandingPage() {
           <div className="landing__hero-content">
             <h1>Your recipes and events, one place.</h1>
             <p className="landing__hero-lead">
-              Save what you cook, plan what you host. Share with friends, tag and search, and let AI help you turn a block of text into a recipe in one click.
+              Save what you cook, plan what you host. Add friends, get notified when they share or accept invites, upload your profile photo, and switch between light and dark mode. Share recipes, tag and search, and let AI turn a block of text into a recipe in one click.
             </p>
             <div className="landing__hero-cta">
               <button type="button" className="landing__cta-primary" onClick={() => goToAuth('signup')}>Get started — it’s free</button>
@@ -164,6 +164,26 @@ export function LandingPage() {
               <span className="landing__feature-icon"><IconSparkles className="app-icon icon--lg" /></span>
               <strong>AI parse</strong>
               <span>Paste text, get a recipe.</span>
+            </div>
+            <div className="landing__feature">
+              <span className="landing__feature-icon"><IconFriends className="app-icon icon--lg" /></span>
+              <strong>Friends</strong>
+              <span>Add friends and see who's here.</span>
+            </div>
+            <div className="landing__feature">
+              <span className="landing__feature-icon"><IconNotifications className="app-icon icon--lg" /></span>
+              <strong>Notifications</strong>
+              <span>When someone shares or accepts.</span>
+            </div>
+            <div className="landing__feature">
+              <span className="landing__feature-icon"><IconPerson className="app-icon icon--lg" /></span>
+              <strong>Profile photo</strong>
+              <span>Upload your picture.</span>
+            </div>
+            <div className="landing__feature">
+              <span className="landing__feature-icon"><IconDarkMode className="app-icon icon--lg" /></span>
+              <strong>Dark mode</strong>
+              <span>Light or dark, your call.</span>
             </div>
           </div>
         </section>

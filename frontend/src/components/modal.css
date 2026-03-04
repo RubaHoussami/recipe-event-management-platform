@@ -66,6 +66,29 @@
   gap: 0.5rem;
   font-size: 0.9375rem;
 }
+.modal__label--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.modal__label--disabled input {
+  cursor: not-allowed;
+}
+
+.modal__friends {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.modal__friends-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+.modal__friends-select {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 0.9375rem;
+}
 
 .modal__error {
   color: var(--error);

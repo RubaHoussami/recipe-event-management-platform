@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import ConflictError, ForbiddenError, NotFoundError
+from app.modules.recipe_shares.repositories import get_share_for_recipe_and_user
 from app.modules.recipe_shares.services import can_edit_recipe, can_view_recipe
 from app.modules.recipes.repositories import (
     RECIPE_STATUSES,
@@ -48,7 +49,14 @@ def get_recipe_controller(db: Session, recipe_id: uuid.UUID, current_user_id: uu
         raise ForbiddenError("Not allowed to access this recipe")
     tags = [t.tag for t in get_recipe_tags(db, recipe_id)]
     statuses = [s.status for s in get_recipe_statuses(db, recipe_id)]
-    return RecipeResponse.model_validate(recipe).model_copy(update={"tags": tags, "statuses": statuses})
+    if recipe.owner_id == current_user_id:
+        access = "owner"
+    else:
+        share = get_share_for_recipe_and_user(db, recipe_id, current_user_id)
+        access = share.permission if share else None
+    return RecipeResponse.model_validate(recipe).model_copy(
+        update={"tags": tags, "statuses": statuses, "access": access}
+    )
 
 
 def create_recipe_controller(
@@ -61,6 +69,7 @@ def create_recipe_controller(
         owner_id=owner_id,
         title=body.title,
         description=body.description,
+        cuisine=body.cuisine,
         ingredients=body.ingredients,
         steps=body.steps,
     )

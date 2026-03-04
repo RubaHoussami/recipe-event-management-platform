@@ -187,6 +187,27 @@ input:focus, textarea:focus, select:focus {
   box-shadow: var(--shadow-sm);
   padding: 1.25rem 1.5rem;
 }
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+a.btn-primary,
+a.btn-secondary {
+  text-decoration: none;
+  box-sizing: border-box;
+}
+a.btn-primary:hover,
+a.btn-secondary:hover {
+  text-decoration: none;
+}
 .btn-primary {
   background: var(--accent);
   color: var(--text-inverse);
@@ -202,6 +223,30 @@ input:focus, textarea:focus, select:focus {
 }
 .btn-secondary:hover:not(:disabled) {
   background: var(--bg);
+  border-color: var(--border-strong);
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.02);
+}
+.btn-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  background: transparent;
+  color: var(--error);
+  border: 1px solid var(--error);
+}
+.btn-delete:hover:not(:disabled) {
+  background: var(--error-bg);
+  color: var(--error);
+}
+a.btn-delete:hover {
+  text-decoration: none;
+  color: var(--error);
 }
 .btn-ghost {
   background: transparent;

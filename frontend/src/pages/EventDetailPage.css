@@ -1,0 +1,119 @@
+.event-detail-page__back {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.9375rem;
+}
+.event-detail-page__back:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.event-detail-page__header {
+  margin-bottom: 1.25rem;
+}
+.event-detail-page__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.event-detail-page__error {
+  color: var(--error);
+  margin: 0;
+}
+.event-detail-page__invite-errors {
+  margin-bottom: 1rem;
+  border-color: var(--error);
+  background: var(--error-bg);
+}
+.event-detail-page__invite-errors-title {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+  color: var(--error);
+}
+.event-detail-page__invite-errors ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+.event-detail-page__invited {
+  margin: 0 0 1rem;
+  font-size: 0.9375rem;
+  color: var(--text);
+}
+.event-detail-page__invited strong {
+  color: var(--text-muted);
+}
+
+.event-detail-page__invited-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.event-detail-page__invited-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.event-detail-page__invited-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+}
+.event-detail-page__invited-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  padding: 0.35rem 0;
+  font-size: 0.9375rem;
+}
+.event-detail-page__invited-remove {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8125rem;
+}
+.event-detail-page__invited-empty {
+  margin: 0 0 0.75rem;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+}
+
+.event-detail-page {
+  width: 100%;
+}
+.event-detail-page__card {
+  width: 100%;
+  box-sizing: border-box;
+}
+.event-detail-page__dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 1.5rem;
+  margin: 0;
+}
+.event-detail-page__dl dt {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.event-detail-page__dl dd {
+  margin: 0;
+  color: var(--text);
+}
+.event-detail-page__description {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+.event-detail-page__description h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+.event-detail-page__description p {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}

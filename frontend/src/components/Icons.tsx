@@ -13,6 +13,7 @@ import {
   MdLogout,
   MdMenuBook,
   MdNotifications,
+  MdPerson,
   MdSettings,
   MdShare,
 } from 'react-icons/md'
@@ -54,4 +55,7 @@ export function IconSparkles({ className }: { className?: string }) {
 }
 export function IconLogout({ className }: { className?: string }) {
   return <MdLogout className={className ?? iconClass} aria-hidden />
+}
+export function IconPerson({ className }: { className?: string }) {
+  return <MdPerson className={className ?? iconClass} aria-hidden />
 }

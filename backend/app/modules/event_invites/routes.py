@@ -4,18 +4,28 @@ from __future__ import annotations
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.core.dependencies import get_current_user
 from app.modules.event_invites.controllers import (
     create_invite_controller,
+    delete_invite_controller,
     get_attendees_controller,
+    get_my_invite_by_token_controller,
     list_invites_controller,
+    list_my_invites_controller,
     respond_controller,
 )
-from app.modules.event_invites.schemas import AttendeesResponse, InviteCreate, InviteRespondRequest, InviteResponse
+from app.modules.event_invites.schemas import (
+    AttendeesResponse,
+    InviteCreate,
+    InviteRespondRequest,
+    InviteResponse,
+    MyInviteDetailResponse,
+    MyInviteWithEvent,
+)
 from app.modules.users.models import User
 
 router = APIRouter()
@@ -76,6 +86,69 @@ def get_attendees(
     current_user: Annotated[User, Depends(get_current_user)],
 ):
     return get_attendees_controller(db, event_id=event_id, current_user_id=current_user.id)
+
+
+@router.delete(
+    "/{event_id}/invites/{invite_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Remove invite",
+    responses={204: {"description": "Removed"}, 401: {"description": "Unauthorized"}, 403: {"description": "Forbidden"}, 404: {"description": "Not found"}},
+    tags=["Invites"],
+)
+def delete_invite_route(
+    event_id: uuid.UUID,
+    invite_id: uuid.UUID,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    delete_invite_controller(db, event_id=event_id, invite_id=invite_id, current_user_id=current_user.id)
+
+
+@invites_router.get(
+    "",
+    response_model=list[MyInviteWithEvent],
+    summary="List event invites for current user",
+    responses={200: {"description": "OK"}, 401: {"description": "Unauthorized"}},
+    tags=["Invites"],
+)
+def list_my_invites(
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+):
+    return list_my_invites_controller(
+        db,
+        current_user_id=current_user.id,
+        current_user_email=current_user.email or "",
+        limit=limit,
+        offset=offset,
+    )
+
+
+@invites_router.get(
+    "/{token}",
+    response_model=MyInviteDetailResponse,
+    summary="Get invite by token (for respond page)",
+    responses={
+        200: {"description": "OK"},
+        401: {"description": "Unauthorized"},
+        403: {"description": "Invite is for another user"},
+        404: {"description": "Invite not found or expired"},
+    },
+    tags=["Invites"],
+)
+def get_my_invite_by_token(
+    token: str,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    return get_my_invite_by_token_controller(
+        db,
+        token=token,
+        current_user_id=str(current_user.id),
+        current_user_email=current_user.email or "",
+    )
 
 
 @invites_router.post(

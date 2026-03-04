@@ -76,13 +76,23 @@
   font-size: 0.85rem;
   color: var(--text-muted);
 }
-.friends-page__remove {
+.friends-page .btn-delete {
   flex-shrink: 0;
 }
 .friends-page__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.75rem;
   font-size: 0.875rem;
-  color: var(--success);
   font-weight: 500;
+  color: var(--success);
+  background: var(--success-bg);
+  border: 1px solid var(--success);
+  border-radius: var(--radius-sm);
+  cursor: default;
+  flex-shrink: 0;
+  pointer-events: none;
 }
 .friends-page__empty {
   color: var(--text-muted);
