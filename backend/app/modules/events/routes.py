@@ -81,7 +81,12 @@ def get_event(
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return get_event_controller(db, event_id=event_id, current_user_id=current_user.id)
+    return get_event_controller(
+        db,
+        event_id=event_id,
+        current_user_id=current_user.id,
+        current_user_email=getattr(current_user, "email", None),
+    )
 
 
 @router.patch(

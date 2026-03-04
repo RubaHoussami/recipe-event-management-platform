@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getEvent, createEvent, updateEvent, createEventInvite, listEventInvites, deleteEventInvite } from '../api/events'
 import type { EventCreate, EventUpdate } from '../api/events'
@@ -139,11 +139,12 @@ export function EventFormPage() {
 
   const saving = createMutation.isPending || updateMutation.isPending
   const err = createMutation.error || updateMutation.error
+  const routerLocation = useLocation()
   if (isEdit && eventLoading) return <p>Loading…</p>
 
   return (
     <div className="event-form-page">
-      <Link to={isEdit ? '/dashboard/events/' + id : '/dashboard/events'} className="event-form-page__back">← Back to events</Link>
+      <Link to={isEdit ? '/dashboard/events/' + id : '/dashboard/events'} state={isEdit ? routerLocation.state : undefined} className="event-form-page__back">← Back</Link>
       <h1>{isEdit ? 'Edit event' : 'New event'}</h1>
       <form onSubmit={handleSubmit}>
         <label>
@@ -219,7 +220,7 @@ export function EventFormPage() {
         {err && <p className="event-form-page__error">{(err as { detail?: string })?.detail ?? 'Something went wrong.'}</p>}
         <div className="event-form-page__actions">
           <button type="submit" className="btn-primary" disabled={saving}>{saving ? 'Saving…' : isEdit ? 'Save changes' : 'Create event'}</button>
-          <Link to={isEdit ? '/dashboard/events/' + id : '/dashboard/events'} className="btn-secondary">Cancel</Link>
+          <Link to={isEdit ? '/dashboard/events/' + id : '/dashboard/events'} state={isEdit ? routerLocation.state : undefined} className="btn-secondary">Cancel</Link>
         </div>
       </form>
     </div>

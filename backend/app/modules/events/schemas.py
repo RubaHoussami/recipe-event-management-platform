@@ -33,5 +33,6 @@ class EventResponse(BaseModel):
     end_time: datetime | None
     created_at: datetime
     updated_at: datetime
+    access: str | None = Field(None, description="Current user's access: owner or invitee (only in GET single)")
 
     model_config = {"from_attributes": True}

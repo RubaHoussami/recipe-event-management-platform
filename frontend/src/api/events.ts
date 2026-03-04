@@ -10,6 +10,8 @@ export interface Event {
   end_time: string | null
   created_at: string
   updated_at: string
+  /** Current user's access: owner or invitee (only in GET single) */
+  access?: 'owner' | 'invitee'
 }
 
 export interface PaginatedEvents {

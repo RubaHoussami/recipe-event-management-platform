@@ -48,13 +48,13 @@ export function SharedWithMePage() {
           <ul className="shared-with-me-page__list">
             {sharedRecipes.items.map((item) => (
               <li key={item.recipe.id} className="shared-with-me-page__item">
-                <Link to={'/dashboard/recipes/' + item.recipe.id} className="shared-with-me-page__item-link">
+                <Link to={'/dashboard/recipes/' + item.recipe.id} state={{ from: '/dashboard/shared' }} className="shared-with-me-page__item-link">
                   <span className="shared-with-me-page__item-title">{item.recipe.title}</span>
                   {item.recipe.cuisine && <span className="shared-with-me-page__item-meta">{item.recipe.cuisine}</span>}
                   <span className="shared-with-me-page__item-permission">({item.permission})</span>
                 </Link>
                 {item.permission === 'editor' && (
-                  <Link to={'/dashboard/recipes/' + item.recipe.id + '/edit'} className="btn-secondary btn-secondary--small shared-with-me-page__edit-link">Edit</Link>
+                  <Link to={'/dashboard/recipes/' + item.recipe.id + '/edit'} state={{ from: '/dashboard/shared' }} className="btn-secondary btn-secondary--small shared-with-me-page__edit-link">Edit</Link>
                 )}
               </li>
             ))}
@@ -74,7 +74,7 @@ export function SharedWithMePage() {
             {invites.map((item: MyInviteWithEvent) => (
               <li key={item.invite.id} className="shared-with-me-page__invite-item">
                 <div className="shared-with-me-page__invite-info">
-                  <Link to={'/dashboard/events/' + item.event.id} className="shared-with-me-page__invite-title">
+                  <Link to={'/dashboard/events/' + item.event.id} state={{ from: '/dashboard/shared' }} className="shared-with-me-page__invite-title">
                     {item.event.title}
                   </Link>
                   <span className="shared-with-me-page__invite-date">{formatEventDate(item.event.start_time)}</span>

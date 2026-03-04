@@ -6,6 +6,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import ForbiddenError, NotFoundError
+from app.modules.event_invites.repositories import get_invite_for_event_and_user
 from app.modules.events.repositories import (
     create_event,
     delete_event,
@@ -37,13 +38,21 @@ def list_events_controller(
     return [EventResponse.model_validate(e) for e in items], total
 
 
-def get_event_controller(db: Session, event_id: uuid.UUID, current_user_id: uuid.UUID) -> EventResponse:
+def get_event_controller(
+    db: Session,
+    event_id: uuid.UUID,
+    current_user_id: uuid.UUID,
+    current_user_email: str | None = None,
+) -> EventResponse:
     event = get_event_by_id(db, event_id)
     if not event:
         raise NotFoundError("Event not found")
-    if event.owner_id != current_user_id:
+    is_owner = event.owner_id == current_user_id
+    invite = get_invite_for_event_and_user(db, event_id, current_user_id, current_user_email)
+    if not is_owner and not invite:
         raise ForbiddenError("Not allowed to access this event")
-    return EventResponse.model_validate(event)
+    access = "owner" if is_owner else "invitee"
+    return EventResponse.model_validate(event).model_copy(update={"access": access})
 
 
 def create_event_controller(

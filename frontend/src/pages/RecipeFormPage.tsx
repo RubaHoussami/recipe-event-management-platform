@@ -192,7 +192,7 @@ export function RecipeFormPage() {
           onClose={() => setApiKeyError(null)}
         />
       )}
-      <Link to={isEdit ? '/dashboard/recipes/' + id : '/dashboard/recipes'} className="recipe-form-page__back">← Back to recipes</Link>
+      <Link to={isEdit ? '/dashboard/recipes/' + id : '/dashboard/recipes'} state={isEdit ? location.state : undefined} className="recipe-form-page__back">← Back</Link>
       <div className="recipe-form-page__title-row">
         <h1>{isEdit ? 'Edit recipe' : 'New recipe'}</h1>
       </div>
@@ -327,7 +327,7 @@ export function RecipeFormPage() {
         {error && <p className="recipe-form-page__error">Failed to save.</p>}
         <div className="recipe-form-page__actions">
           <button type="submit" className="btn-primary" disabled={loading}>{loading ? 'Saving…' : isEdit ? 'Update' : 'Create'}</button>
-          <Link to={isEdit ? '/dashboard/recipes/' + id : '/dashboard/recipes'} className="btn-secondary">Cancel</Link>
+          <Link to={isEdit ? '/dashboard/recipes/' + id : '/dashboard/recipes'} state={isEdit ? location.state : undefined} className="btn-secondary">Cancel</Link>
         </div>
       </form>
     </div>

@@ -72,6 +72,25 @@ def delete_invite(db: Session, invite: EventInvite) -> None:
     db.commit()
 
 
+def get_invite_for_event_and_user(
+    db: Session,
+    event_id: uuid.UUID,
+    user_id: uuid.UUID,
+    user_email: str | None = None,
+) -> EventInvite | None:
+    """Return invite if this user is invited to this event (by user_id or email)."""
+    from sqlalchemy import or_
+    eid = event_id if isinstance(event_id, uuid.UUID) else uuid.UUID(event_id)
+    uid = user_id if isinstance(user_id, uuid.UUID) else uuid.UUID(user_id)
+    email = (user_email or "").strip().lower()
+    if email:
+        cond = or_(EventInvite.invited_user_id == uid, EventInvite.invited_email == email)
+    else:
+        cond = EventInvite.invited_user_id == uid
+    stmt = select(EventInvite).where(EventInvite.event_id == eid, cond)
+    return db.execute(stmt).scalar_one_or_none()
+
+
 def get_invites_for_user(
     db: Session,
     user_id: uuid.UUID,

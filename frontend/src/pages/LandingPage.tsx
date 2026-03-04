@@ -79,7 +79,10 @@ export function LandingPage() {
   return (
     <div className="landing">
       <header className="landing__nav">
-        <a href="/" className="landing__logo">Recipes & Events</a>
+        <a href="/" className="landing__logo">
+          <img src="/images/logo.jpg" alt="" className="landing__logo-img" />
+          <span className="landing__logo-text">Feast & Fest</span>
+        </a>
         <div className="landing__nav-actions">
           <button type="button" className="landing__theme-toggle" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
             {theme === 'dark' ? <IconLightMode className="app-icon icon--sm" /> : <IconDarkMode className="app-icon icon--sm" />}
@@ -115,7 +118,7 @@ export function LandingPage() {
         <section className="landing__about">
           <h2>Built for home cooks and hosts</h2>
           <p className="landing__about-lead">
-            Whether you’re keeping a personal cookbook, planning a dinner party, or sharing a recipe with a friend, Recipes & Events keeps everything organized and easy to find.
+            Whether you’re keeping a personal cookbook, planning a dinner party, or sharing a recipe with a friend, Feast & Fest keeps everything organized and easy to find.
           </p>
           <div className="landing__about-grid">
             <div className="landing__about-card">

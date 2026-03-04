@@ -34,12 +34,12 @@ export function EventDetailPage() {
   const { data: attendees } = useQuery({
     queryKey: ['event-attendees', id],
     queryFn: () => getEventAttendees(id!),
-    enabled: !!id,
+    enabled: !!id && event?.access === 'owner',
   })
   const { data: invites } = useQuery({
     queryKey: ['event-invites', id],
     queryFn: () => listEventInvites(id!),
-    enabled: !!id,
+    enabled: !!id && event?.access === 'owner',
   })
 
   const deleteMutation = useMutation({
@@ -61,23 +61,28 @@ export function EventDetailPage() {
   if (isLoading) return <p>Loading…</p>
   if (error || !event) return <p className="event-detail-page__error">Event not found.</p>
 
+  const backTo = (location.state as { from?: string } | null)?.from ?? '/dashboard/events'
+  const isOwner = event.access === 'owner'
+
   return (
     <div className="event-detail-page">
-      <Link to="/dashboard/events" className="event-detail-page__back">← All events</Link>
+      <Link to={backTo} className="event-detail-page__back">← Back</Link>
       <div className="page-header event-detail-page__header">
         <h1>{event.title}</h1>
-        <div className="event-detail-page__actions">
-          <button type="button" className="btn-secondary" onClick={() => setShareOpen(true)}>Share</button>
-          <Link to={'/dashboard/events/' + id + '/edit'} className="btn-primary">Edit</Link>
-          <button
-            type="button"
-            className="btn-delete"
-            onClick={() => window.confirm('Delete this event?') && deleteMutation.mutate()}
-            disabled={deleteMutation.isPending}
-          >
-            {deleteMutation.isPending ? 'Deleting…' : 'Delete'}
-          </button>
-        </div>
+        {isOwner && (
+          <div className="event-detail-page__actions">
+            <button type="button" className="btn-secondary" onClick={() => setShareOpen(true)}>Share</button>
+            <Link to={'/dashboard/events/' + id + '/edit'} state={location.state} className="btn-primary">Edit</Link>
+            <button
+              type="button"
+              className="btn-delete"
+              onClick={() => window.confirm('Delete this event?') && deleteMutation.mutate()}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? 'Deleting…' : 'Delete'}
+            </button>
+          </div>
+        )}
       </div>
       {inviteErrors.length > 0 && (
         <div className="event-detail-page__invite-errors card">
@@ -85,6 +90,7 @@ export function EventDetailPage() {
           <ul>{inviteErrors.map((e, i) => <li key={i}>{e}</li>)}</ul>
         </div>
       )}
+      {isOwner && (
       <section className="event-detail-page__invited-section">
           <h2 className="event-detail-page__invited-heading">Invited</h2>
           {invites && invites.length > 0 ? (
@@ -108,6 +114,7 @@ export function EventDetailPage() {
           )}
           <button type="button" className="btn-secondary" onClick={() => setShareOpen(true)}>Share</button>
         </section>
+      )}
       <div className="card event-detail-page__card">
         <dl className="event-detail-page__dl">
           <dt>Start</dt>

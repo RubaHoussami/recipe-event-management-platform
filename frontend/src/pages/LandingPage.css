@@ -20,6 +20,9 @@
 }
 
 .landing__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.25rem;
@@ -29,6 +32,15 @@
 .landing__logo:hover {
   color: var(--accent);
   text-decoration: none;
+}
+.landing__logo-img {
+  height: 2.25rem;
+  width: auto;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+.landing__logo-text {
+  white-space: nowrap;
 }
 
 .landing__nav-actions {

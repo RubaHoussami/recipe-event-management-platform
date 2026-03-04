@@ -31,6 +31,9 @@
 }
 
 .dashboard__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.2rem;
@@ -40,6 +43,15 @@
 .dashboard__brand:hover {
   color: var(--sidebar-accent);
   text-decoration: none;
+}
+.dashboard__brand-logo {
+  height: 2rem;
+  width: auto;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+.dashboard__brand-text {
+  white-space: nowrap;
 }
 
 .dashboard__topbar-right {

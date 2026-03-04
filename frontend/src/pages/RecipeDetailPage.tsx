@@ -84,6 +84,8 @@ export function RecipeDetailPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['recipe-shares', id] }),
   })
 
+  const backTo = (location.state as { from?: string } | null)?.from ?? '/dashboard/recipes'
+
   if (!id) return <p>Invalid recipe.</p>
   if (isLoading) return <p>Loading…</p>
   if (error || !recipe) return <p>Recipe not found.</p>
@@ -101,7 +103,7 @@ export function RecipeDetailPage() {
         />
       )}
       <div className="recipe-detail__nav">
-        <Link to="/dashboard/recipes">← Recipes</Link>
+        <Link to={backTo}>← Back</Link>
       </div>
       <div className="recipe-detail__head">
         <h1>{recipe.title}</h1>
@@ -109,7 +111,7 @@ export function RecipeDetailPage() {
           {(recipe.access === 'owner' || recipe.access === 'editor') && (
             <>
               <button type="button" className="btn-secondary" onClick={() => setShareOpen(true)}>Share</button>
-              <Link to={'/dashboard/recipes/' + id + '/edit'} className="btn-secondary">Edit</Link>
+              <Link to={'/dashboard/recipes/' + id + '/edit'} state={location.state} className="btn-secondary">Edit</Link>
               {recipe.access === 'owner' && (
                 <button type="button" className="btn-delete" onClick={() => window.confirm('Delete this recipe?') && deleteMutation.mutate()} disabled={deleteMutation.isPending}>
                   {deleteMutation.isPending ? 'Deleting…' : 'Delete'}
@@ -174,6 +176,16 @@ export function RecipeDetailPage() {
           <p style={{ margin: 0 }}>{recipe.description}</p>
         </div>
       )}
+      <div className="recipe-detail__grid">
+        <section className="recipe-detail__section">
+          <h2>Ingredients</h2>
+          <ul className="recipe-detail__list">{recipe.ingredients.map((i, idx) => <li key={idx}>{i}</li>)}</ul>
+        </section>
+        <section className="recipe-detail__section">
+          <h2>Steps</h2>
+          <ol className="recipe-detail__list recipe-detail__list--steps">{recipe.steps.map((s, idx) => <li key={idx}>{s}</li>)}</ol>
+        </section>
+      </div>
       {(recipe.access === 'owner' || recipe.access === 'editor') && (
         <section className="recipe-detail__meta-row">
           <div className="recipe-detail__section">
@@ -214,16 +226,6 @@ export function RecipeDetailPage() {
           </div>
         </section>
       )}
-      <div className="recipe-detail__grid">
-        <section className="recipe-detail__section">
-          <h2>Ingredients</h2>
-          <ul className="recipe-detail__list">{recipe.ingredients.map((i, idx) => <li key={idx}>{i}</li>)}</ul>
-        </section>
-        <section className="recipe-detail__section">
-          <h2>Steps</h2>
-          <ol className="recipe-detail__list recipe-detail__list--steps">{recipe.steps.map((s, idx) => <li key={idx}>{s}</li>)}</ol>
-        </section>
-      </div>
       {shareOpen && (
         <ShareModal
           target="recipe"

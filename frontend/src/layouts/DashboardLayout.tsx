@@ -65,7 +65,10 @@ export function DashboardLayout() {
   return (
     <div className="dashboard">
       <header className="dashboard__topbar">
-        <NavLink to="/dashboard" className="dashboard__brand">Recipes & Events</NavLink>
+        <NavLink to="/dashboard" className="dashboard__brand">
+          <img src="/images/logo.jpg" alt="" className="dashboard__brand-logo" />
+          <span className="dashboard__brand-text">Feast & Fest</span>
+        </NavLink>
         <div className="dashboard__topbar-right">
           <button type="button" className="dashboard__theme-toggle" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Light mode' : 'Dark mode'} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
             {theme === 'dark' ? <IconLightMode className="app-icon icon--sm" /> : <IconDarkMode className="app-icon icon--sm" />}

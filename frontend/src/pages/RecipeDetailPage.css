@@ -153,6 +153,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
   margin-top: 1rem;
+  margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
 }
 @media (max-width: 768px) {
   .recipe-detail__grid {
@@ -184,6 +185,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
+  margin-top: 0;
   margin-bottom: 1.5rem;
 }
 @media (max-width: 768px) {

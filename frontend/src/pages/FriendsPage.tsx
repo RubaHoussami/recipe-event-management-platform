@@ -2,7 +2,14 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { listFriends, addFriendByEmail, removeFriend, listPeople } from '../api/friends'
 import type { Friend, Person } from '../api/friends'
+import { useUserAvatarUrl } from '../hooks/useUserAvatarUrl'
 import './FriendsPage.css'
+
+function UserAvatar({ userId, name, className }: { userId: string; name: string; className?: string }) {
+  const avatarUrl = useUserAvatarUrl(userId)
+  if (avatarUrl) return <img src={avatarUrl} alt="" className={className} />
+  return <span className={className ? `${className} friends-page__avatar--placeholder` : 'friends-page__avatar friends-page__avatar--placeholder'}>{name[0].toUpperCase()}</span>
+}
 
 export function FriendsPage() {
   const queryClient = useQueryClient()
@@ -72,11 +79,7 @@ export function FriendsPage() {
             {friends.map((f: Friend) => (
               <li key={f.friend_id} className="friends-page__item">
                 <div className="friends-page__item-info">
-                  {f.friend_avatar_url ? (
-                    <img src={f.friend_avatar_url} alt="" className="friends-page__avatar" />
-                  ) : (
-                    <span className="friends-page__avatar friends-page__avatar--placeholder">{(f.friend_name || f.friend_email)[0].toUpperCase()}</span>
-                  )}
+                  <UserAvatar userId={f.friend_id} name={f.friend_name || f.friend_email} className="friends-page__avatar" />
                   <div>
                     <strong>{f.friend_name || f.friend_email}</strong>
                     {f.friend_name && <span className="friends-page__email">{f.friend_email}</span>}
@@ -108,11 +111,7 @@ export function FriendsPage() {
             {people.map((p: Person) => (
               <li key={p.id} className="friends-page__item">
                 <div className="friends-page__item-info">
-                  {p.avatar_url ? (
-                    <img src={p.avatar_url} alt="" className="friends-page__avatar" />
-                  ) : (
-                    <span className="friends-page__avatar friends-page__avatar--placeholder">{(p.name || p.email)[0].toUpperCase()}</span>
-                  )}
+                  <UserAvatar userId={p.id} name={p.name || p.email} className="friends-page__avatar" />
                   <div>
                     <strong>{p.name || p.email}</strong>
                     {p.name && <span className="friends-page__email">{p.email}</span>}
