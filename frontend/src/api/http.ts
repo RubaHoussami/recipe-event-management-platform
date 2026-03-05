@@ -1,4 +1,5 @@
-export const API_BASE = '/api'
+/** In production, set VITE_API_PROXY_TARGET (or VITE_API_URL) in the build (e.g. from GitHub Secrets). In dev, use relative /api (Vite proxy). */
+export const API_BASE = (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_PROXY_TARGET) ?? '/api'
 
 export type ApiError = { status?: number; detail: unknown }
 
