@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { login, register } from '../api/auth'
+import { login, register, verifyEmail, resendOtp } from '../api/auth'
 import { getToken } from '../api/http'
 import { useTheme } from '../contexts/ThemeContext'
 import { IconDarkMode, IconEvents, IconFriends, IconLightMode, IconNotifications, IconPerson, IconRecipes, IconShare, IconSparkles } from '../components/Icons'
@@ -21,6 +21,9 @@ export function LandingPage() {
   const [signupEmail, setSignupEmail] = useState('')
   const [signupName, setSignupName] = useState('')
   const [signupPassword, setSignupPassword] = useState('')
+  const [pendingVerifyEmail, setPendingVerifyEmail] = useState<string | null>(null)
+  const [otpCode, setOtpCode] = useState('')
+  const [resendCooldown, setResendCooldown] = useState(0)
 
   useEffect(() => {
     const hash = location.hash.replace('#', '')
@@ -67,7 +70,9 @@ export function LandingPage() {
     setLoading(true)
     try {
       await register(signupEmail, signupName, signupPassword)
-      navigate('/dashboard', { replace: true })
+      setPendingVerifyEmail(signupEmail)
+      setOtpCode('')
+      setError(null)
     } catch (err: unknown) {
       const d = err && typeof err === 'object' && 'detail' in err ? (err as { detail: unknown }).detail : 'Registration failed'
       setError(typeof d === 'string' ? d : JSON.stringify(d))
@@ -75,6 +80,45 @@ export function LandingPage() {
       setLoading(false)
     }
   }
+
+  async function handleVerify(e: React.FormEvent) {
+    e.preventDefault()
+    if (!pendingVerifyEmail || !otpCode.trim()) return
+    setError(null)
+    setLoading(true)
+    try {
+      await verifyEmail(pendingVerifyEmail, otpCode.trim())
+      setPendingVerifyEmail(null)
+      setOtpCode('')
+      navigate('/dashboard', { replace: true })
+    } catch (err: unknown) {
+      const d = err && typeof err === 'object' && 'detail' in err ? (err as { detail: unknown }).detail : 'Verification failed'
+      setError(typeof d === 'string' ? d : JSON.stringify(d))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleResendOtp() {
+    if (!pendingVerifyEmail) return
+    setError(null)
+    setLoading(true)
+    try {
+      await resendOtp(pendingVerifyEmail)
+      setResendCooldown(60)
+    } catch (err: unknown) {
+      const d = err && typeof err === 'object' && 'detail' in err ? (err as { detail: unknown }).detail : 'Could not resend code'
+      setError(typeof d === 'string' ? d : JSON.stringify(d))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return
+    const t = setInterval(() => setResendCooldown((p) => (p <= 1 ? 0 : p - 1)), 1000)
+    return () => clearInterval(t)
+  }, [resendCooldown])
 
   return (
     <div className="landing">
@@ -192,27 +236,48 @@ export function LandingPage() {
         </section>
 
         <section className="landing__auth-section" id="auth" ref={authRef}>
-          <h2>Sign in or create an account</h2>
+          <h2>{pendingVerifyEmail ? 'Verify your email' : 'Sign in or create an account'}</h2>
           <div className="landing__auth">
-            <div className="landing__tabs">
-              <button type="button" className={tab === 'login' ? 'active' : ''} onClick={() => { setTab('login'); setError(null); }}>Sign in</button>
-              <button type="button" className={tab === 'signup' ? 'active' : ''} onClick={() => { setTab('signup'); setError(null); }}>Sign up</button>
-            </div>
-            {error && <div className="landing__error">{error}</div>}
-            {tab === 'login' && (
-              <form onSubmit={handleLogin} className="landing__form">
-                <input type="email" placeholder="Email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required autoComplete="email" />
-                <input type="password" placeholder="Password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required autoComplete="current-password" />
-                <button type="submit" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</button>
-              </form>
-            )}
-            {tab === 'signup' && (
-              <form onSubmit={handleSignup} className="landing__form">
-                <input type="email" placeholder="Email" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} required autoComplete="email" />
-                <input type="text" placeholder="Name" value={signupName} onChange={(e) => setSignupName(e.target.value)} required autoComplete="name" />
-                <input type="password" placeholder="Password (min 8 characters)" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} required minLength={8} autoComplete="new-password" />
-                <button type="submit" disabled={loading}>{loading ? 'Creating account…' : 'Sign up'}</button>
-              </form>
+            {pendingVerifyEmail ? (
+              <>
+                <p className="landing__verify-intro">We sent a 6-digit code to <strong>{pendingVerifyEmail}</strong>. Enter it below.</p>
+                <p className="landing__verify-junk">If you don't see it, check your junk or spam folder.</p>
+                {error && <div className="landing__error">{error}</div>}
+                <form onSubmit={handleVerify} className="landing__form">
+                  <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={6} placeholder="000000" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} required autoComplete="one-time-code" />
+                  <button type="submit" disabled={loading || otpCode.length !== 6}>{loading ? 'Verifying…' : 'Verify'}</button>
+                </form>
+                <p className="landing__resend">
+                  Didn’t get the email?{' '}
+                  <button type="button" className="landing__resend-btn" onClick={handleResendOtp} disabled={loading || resendCooldown > 0}>
+                    {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
+                  </button>
+                </p>
+                <button type="button" className="landing__back-link" onClick={() => { setPendingVerifyEmail(null); setOtpCode(''); setError(null); }}>← Back to sign up</button>
+              </>
+            ) : (
+              <>
+                <div className="landing__tabs">
+                  <button type="button" className={tab === 'login' ? 'active' : ''} onClick={() => { setTab('login'); setError(null); }}>Sign in</button>
+                  <button type="button" className={tab === 'signup' ? 'active' : ''} onClick={() => { setTab('signup'); setError(null); }}>Sign up</button>
+                </div>
+                {error && <div className="landing__error">{error}</div>}
+                {tab === 'login' && (
+                  <form onSubmit={handleLogin} className="landing__form">
+                    <input type="email" placeholder="Email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required autoComplete="email" />
+                    <input type="password" placeholder="Password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required autoComplete="current-password" />
+                    <button type="submit" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</button>
+                  </form>
+                )}
+                {tab === 'signup' && (
+                  <form onSubmit={handleSignup} className="landing__form">
+                    <input type="email" placeholder="Email" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} required autoComplete="email" />
+                    <input type="text" placeholder="Name" value={signupName} onChange={(e) => setSignupName(e.target.value)} required autoComplete="name" />
+                    <input type="password" placeholder="Password (min 8 characters)" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} required minLength={8} autoComplete="new-password" />
+                    <button type="submit" disabled={loading}>{loading ? 'Creating account…' : 'Sign up'}</button>
+                  </form>
+                )}
+              </>
             )}
           </div>
         </section>

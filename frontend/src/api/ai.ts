@@ -35,3 +35,17 @@ export function suggestRecipes(cuisine: string): Promise<{ suggestions: RecipeSu
     body: JSON.stringify({ cuisine }),
   })
 }
+
+export interface ParseEventResponse {
+  title: string
+  start_time: string
+  location: string | null
+  end_time: string | null
+}
+
+export function parseEvent(freeText: string, useOpenai: boolean = false): Promise<ParseEventResponse> {
+  return apiRequest<ParseEventResponse>('/ai/events/parse', {
+    method: 'POST',
+    body: JSON.stringify({ free_text: freeText, use_openai: useOpenai }),
+  })
+}

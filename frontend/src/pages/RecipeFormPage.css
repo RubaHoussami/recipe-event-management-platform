@@ -53,6 +53,13 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+.recipe-form-page__suggest-btn {
+  flex-shrink: 0;
+}
+.recipe-form-page__suggest-btn--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 .recipe-form-page form {
   display: flex;

@@ -1,16 +1,25 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useOutletContext } from 'react-router-dom'
-import { parseRecipe } from '../api/ai'
+import { Link, useNavigate, useOutletContext } from 'react-router-dom'
+import { parseEvent } from '../api/ai'
 import type { UserMe } from '../api/auth'
 import { AlertModal, getApiKeyErrorDetail } from '../components/AlertModal'
-import './ParseRecipePage.css'
+import './ParseEventPage.css'
+
+function toDatetimeLocal(iso: string): string {
+  const d = new Date(iso)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const h = String(d.getHours()).padStart(2, '0')
+  const min = String(d.getMinutes()).padStart(2, '0')
+  return `${y}-${m}-${day}T${h}:${min}`
+}
 
 const canUseAi = (u: UserMe | null) =>
   (u?.ai_preference === 'my_key' && u?.openai_configured) ||
   (u?.ai_preference === 'hosted' && u?.azure_ai_available && u?.email_verified)
 
-export function ParseRecipePage() {
+export function ParseEventPage() {
   const navigate = useNavigate()
   const { user } = useOutletContext<{ user: UserMe | null }>()
   const aiEnabled = canUseAi(user)
@@ -26,16 +35,14 @@ export function ParseRecipePage() {
     setApiKeyError(null)
     setLoading(true)
     try {
-      const res = await parseRecipe(freeText, useOpenai)
+      const res = await parseEvent(freeText.trim(), useOpenai)
       const parsed = {
         title: res.title ?? '',
-        description: res.description ?? '',
-        ingredients: Array.isArray(res.ingredients) && res.ingredients.length > 0 ? res.ingredients : [''],
-        steps: Array.isArray(res.steps) && res.steps.length > 0 ? res.steps : [''],
-        cuisine: res.cuisine ?? null,
-        shareWith: Array.isArray(res.share_with) && res.share_with.length > 0 ? res.share_with : [''],
+        location: res.location ?? null,
+        startTime: toDatetimeLocal(res.start_time),
+        endTime: res.end_time ? toDatetimeLocal(res.end_time) : null,
       }
-      navigate('/dashboard/recipes/new', { state: { parsed } })
+      navigate('/dashboard/events/new', { state: { parsed } })
     } catch (err: unknown) {
       const apiKeyMsg = getApiKeyErrorDetail(err)
       if (apiKeyMsg) setApiKeyError(apiKeyMsg)
@@ -46,7 +53,7 @@ export function ParseRecipePage() {
   }
 
   return (
-    <div className="parse-recipe-page">
+    <div className="parse-event-page">
       {apiKeyError && (
         <AlertModal
           title="AI / API key"
@@ -54,24 +61,26 @@ export function ParseRecipePage() {
           onClose={() => setApiKeyError(null)}
         />
       )}
-      <Link to="/dashboard/recipes" className="parse-recipe-page__back">← Back to recipes</Link>
-      <h1>Parse recipe</h1>
-      <p className="parse-recipe-page__intro">Paste recipe text below. We’ll extract title, ingredients, and steps, then open the new recipe form with the fields filled so you can edit and save.</p>
+      <Link to="/dashboard/events" className="parse-event-page__back">← Back to events</Link>
+      <h1>Parse event</h1>
+      <p className="parse-event-page__intro">
+        Paste event text below (e.g. &quot;Team lunch next Friday at 12:30 at Mario&apos;s&quot;). We&apos;ll extract title, time, and location, then open the new event form with the fields filled so you can edit and save.
+      </p>
 
-      <form onSubmit={handleParse} className="parse-recipe-page__form">
-        <label className="parse-recipe-page__label">
-          <span>Recipe text</span>
+      <form onSubmit={handleParse} className="parse-event-page__form">
+        <label className="parse-event-page__label">
+          <span>Event description</span>
           <textarea
-            className="parse-recipe-page__textarea"
-            placeholder="Paste recipe text here…"
+            className="parse-event-page__textarea"
+            placeholder="e.g. Dinner party Saturday 7pm at my place"
             value={freeText}
             onChange={(e) => setFreeText(e.target.value)}
-            rows={12}
+            rows={8}
             required
           />
         </label>
         <label
-          className={`parse-recipe-page__checkbox${!aiEnabled ? ' parse-recipe-page__checkbox--disabled' : ''}`}
+          className={`parse-event-page__checkbox${!aiEnabled ? ' parse-event-page__checkbox--disabled' : ''}`}
           title={!aiEnabled ? 'Enable AI in Settings (My API key or Use hosted model)' : undefined}
         >
           <input
@@ -82,15 +91,15 @@ export function ParseRecipePage() {
           />
           <span>Use AI for better parsing</span>
         </label>
-        <div className="parse-recipe-page__actions">
+        <div className="parse-event-page__actions">
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? 'Parsing…' : 'Parse'}
           </button>
-          <Link to="/dashboard/recipes/new" className="btn-secondary">Add recipe manually</Link>
+          <Link to="/dashboard/events/new" className="btn-secondary">Add event manually</Link>
         </div>
       </form>
 
-      {error && <p className="parse-recipe-page__error">{error}</p>}
+      {error && <p className="parse-event-page__error">{error}</p>}
     </div>
   )
 }

@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
-import { useParams, useNavigate, Link, useLocation } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { useParams, useNavigate, Link, useLocation, useOutletContext } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import type { UserMe } from '../api/auth'
 import { getEvent, createEvent, updateEvent, createEventInvite, listEventInvites, deleteEventInvite } from '../api/events'
 import type { EventCreate, EventUpdate } from '../api/events'
 import { ShareModal } from '../components/ShareModal'
@@ -42,11 +43,21 @@ function errDetailToString(err: unknown): string {
   return 'Failed to invite'
 }
 
+interface ParsedEventState {
+  title?: string
+  location?: string | null
+  startTime?: string
+  endTime?: string | null
+}
+
 export function EventFormPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const routerLocation = useLocation()
   const queryClient = useQueryClient()
+  const { user } = useOutletContext<{ user: UserMe | null }>()
   const isEdit = !!id
+  const appliedParsedRef = useRef(false)
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -76,6 +87,19 @@ export function EventFormPage() {
       setEndTime(event.end_time ? toDatetimeLocal(event.end_time) : defaultEnd())
     }
   }, [event])
+
+  useEffect(() => {
+    if (isEdit || appliedParsedRef.current) return
+    const state = routerLocation.state as { parsed?: ParsedEventState } | null
+    const parsed = state?.parsed
+    if (!parsed) return
+    appliedParsedRef.current = true
+    if (parsed.title != null) setTitle(parsed.title)
+    if (parsed.location != null) setLocation(parsed.location)
+    if (parsed.startTime != null) setStartTime(parsed.startTime)
+    if (parsed.endTime != null) setEndTime(parsed.endTime)
+    navigate(routerLocation.pathname, { replace: true, state: {} })
+  }, [isEdit, routerLocation.state, routerLocation.pathname, navigate])
 
   const createMutation = useMutation({
     mutationFn: async ({ body, shareWith }: { body: EventCreate; shareWith: string[] }) => {
@@ -139,13 +163,14 @@ export function EventFormPage() {
 
   const saving = createMutation.isPending || updateMutation.isPending
   const err = createMutation.error || updateMutation.error
-  const routerLocation = useLocation()
   if (isEdit && eventLoading) return <p>Loading…</p>
 
   return (
     <div className="event-form-page">
       <Link to={isEdit ? '/dashboard/events/' + id : '/dashboard/events'} state={isEdit ? routerLocation.state : undefined} className="event-form-page__back">← Back</Link>
-      <h1>{isEdit ? 'Edit event' : 'New event'}</h1>
+      <div className="event-form-page__title-row">
+        <h1>{isEdit ? 'Edit event' : 'New event'}</h1>
+      </div>
       <form onSubmit={handleSubmit}>
         <label>
           Title

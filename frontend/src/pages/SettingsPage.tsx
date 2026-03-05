@@ -1,8 +1,8 @@
 import { useRef, useState, useEffect } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
-import { deleteAvatar, setOpenAIKey, uploadAvatar, updateMe } from '../api/auth'
-import type { UserMe } from '../api/auth'
+import { deleteAvatar, resendOtp, setAiPreference, setOpenAIKey, uploadAvatar, updateMe, verifyEmail } from '../api/auth'
+import type { AiPreference, UserMe } from '../api/auth'
 import { useMyAvatarUrl } from '../hooks/useMyAvatarUrl'
 import './SettingsPage.css'
 
@@ -17,9 +17,13 @@ export function SettingsPage() {
   const [openaiKey, setOpenaiKeyLocal] = useState('')
   const [profileName, setProfileName] = useState('')
   const [saving, setSaving] = useState(false)
+  const [preferenceSaving, setPreferenceSaving] = useState(false)
   const [profileSaving, setProfileSaving] = useState(false)
   const [avatarSaving, setAvatarSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [otpCode, setOtpCode] = useState('')
+  const [verifySaving, setVerifySaving] = useState(false)
+  const [resendCooldown, setResendCooldown] = useState(0)
 
   useEffect(() => {
     if (user) {
@@ -83,6 +87,43 @@ export function SettingsPage() {
     }
   }
 
+  async function handleVerifyEmail(e: React.FormEvent) {
+    e.preventDefault()
+    if (!user?.email || !otpCode.trim()) return
+    setMessage(null)
+    setVerifySaving(true)
+    try {
+      await verifyEmail(user.email, otpCode.trim())
+      setOtpCode('')
+      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+      setMessage({ type: 'success', text: 'Email verified.' })
+    } catch (err: unknown) {
+      const detail = typeof err === 'object' && err !== null && 'detail' in err ? String((err as { detail: unknown }).detail) : 'Verification failed.'
+      setMessage({ type: 'error', text: detail })
+    } finally {
+      setVerifySaving(false)
+    }
+  }
+
+  async function handleResendOtp() {
+    if (!user?.email) return
+    setMessage(null)
+    try {
+      await resendOtp(user.email)
+      setResendCooldown(60)
+      setMessage({ type: 'success', text: 'Verification code sent to your email.' })
+    } catch (err: unknown) {
+      const detail = typeof err === 'object' && err !== null && 'detail' in err ? String((err as { detail: unknown }).detail) : 'Could not resend code.'
+      setMessage({ type: 'error', text: detail })
+    }
+  }
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return
+    const t = setInterval(() => setResendCooldown((p) => (p <= 1 ? 0 : p - 1)), 1000)
+    return () => clearInterval(t)
+  }, [resendCooldown])
+
   async function handleSaveKey(e: React.FormEvent) {
     e.preventDefault()
     setMessage(null)
@@ -113,6 +154,26 @@ export function SettingsPage() {
       setSaving(false)
     }
   }
+
+  async function handleAiPreferenceChange(pref: AiPreference) {
+    if (pref === (user?.ai_preference ?? 'my_key')) return
+    setMessage(null)
+    setPreferenceSaving(true)
+    try {
+      await setAiPreference(pref)
+      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+      setMessage({ type: 'success', text: 'AI preference updated.' })
+    } catch {
+      setMessage({ type: 'error', text: 'Failed to update preference.' })
+    } finally {
+      setPreferenceSaving(false)
+    }
+  }
+
+  const canUseAi =
+    (user?.ai_preference === 'my_key' && user?.openai_configured) ||
+    (user?.ai_preference === 'hosted' && user?.azure_ai_available && user?.email_verified)
+  const hostedAvailableToUser = Boolean(user?.azure_ai_available && user?.email_verified)
 
   return (
     <div className="settings-page">
@@ -170,32 +231,106 @@ export function SettingsPage() {
         </form>
       </div>
 
-      <div className="card settings-page__section">
-        <h2>OpenAI API Key</h2>
-        <p className="settings-page__hint">
-          Add your OpenAI API key to enable “Parse recipe” and other AI features. Your key is stored securely and never used by our servers except to call OpenAI when you use those features.
-        </p>
-        <form onSubmit={handleSaveKey} className="settings-page__form">
-          <label>
-            <span>OpenAI API key</span>
+      {user && !user.email_verified && (
+        <div className="card settings-page__section">
+          <h2>Verify your email</h2>
+          <p className="settings-page__hint">We sent a 6-digit code to <strong>{user.email}</strong>. Enter it below to verify.</p>
+          <p className="settings-page__hint settings-page__hint-small">If you don't see it, check your junk or spam folder.</p>
+          <form onSubmit={handleVerifyEmail} className="settings-page__form">
+            <label>
+              <span>Verification code</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                placeholder="000000"
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                autoComplete="one-time-code"
+              />
+            </label>
+            <div className="settings-page__form-actions">
+              <button type="submit" className="btn-primary" disabled={verifySaving || otpCode.length !== 6}>
+                {verifySaving ? 'Verifying…' : 'Verify email'}
+              </button>
+              <button type="button" className="btn-secondary" onClick={handleResendOtp} disabled={resendCooldown > 0}>
+                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className="card settings-page__section settings-page__ai-section">
+        <div className="settings-page__ai-header">
+          <h2 className="settings-page__ai-title">AI (recipe parsing & suggestions)</h2>
+          <p className="settings-page__ai-desc">
+            Choose how to use AI. Rate limits apply. The hosted model is only available to verified accounts.
+          </p>
+        </div>
+        <div className="settings-page__ai-options">
+          <label className={`settings-page__ai-option${(user?.ai_preference ?? 'my_key') === 'off' ? ' settings-page__ai-option--active' : ''}`}>
             <input
-              type="password"
-              placeholder="sk-…"
-              value={openaiKey}
-              onChange={(e) => setOpenaiKeyLocal(e.target.value)}
-              autoComplete="off"
+              type="radio"
+              name="ai_preference"
+              checked={(user?.ai_preference ?? 'my_key') === 'off'}
+              onChange={() => handleAiPreferenceChange('off')}
+              disabled={preferenceSaving}
             />
+            <span className="settings-page__ai-option-label">Off</span>
+            <span className="settings-page__ai-option-hint">No AI features</span>
           </label>
-          <div className="settings-page__form-actions">
-            <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? 'Saving…' : 'Save'}
-            </button>
-            <button type="button" className="btn-delete" onClick={handleClearKey} disabled={saving}>
-              Clear key
-            </button>
-          </div>
-        </form>
-        {user?.openai_configured && <p className="settings-page__status success">OpenAI is configured for your account.</p>}
+          <label className={`settings-page__ai-option${(user?.ai_preference ?? 'my_key') === 'my_key' ? ' settings-page__ai-option--active' : ''}`}>
+            <input
+              type="radio"
+              name="ai_preference"
+              checked={(user?.ai_preference ?? 'my_key') === 'my_key'}
+              onChange={() => handleAiPreferenceChange('my_key')}
+              disabled={preferenceSaving}
+            />
+            <span className="settings-page__ai-option-label">My API key</span>
+            <span className="settings-page__ai-option-hint">Use your own OpenAI key (stored securely)</span>
+          </label>
+          {user?.azure_ai_available && (
+            <label className={`settings-page__ai-option${(user?.ai_preference ?? 'my_key') === 'hosted' ? ' settings-page__ai-option--active' : ''}${!hostedAvailableToUser ? ' settings-page__ai-option--disabled' : ''}`}>
+              <input
+                type="radio"
+                name="ai_preference"
+                checked={(user?.ai_preference ?? 'my_key') === 'hosted'}
+                onChange={() => hostedAvailableToUser && handleAiPreferenceChange('hosted')}
+                disabled={preferenceSaving || !hostedAvailableToUser}
+              />
+              <span className="settings-page__ai-option-label">Use hosted model</span>
+              <span className="settings-page__ai-option-hint">
+                {hostedAvailableToUser ? 'App’s hosted model (verified only)' : 'Verify your email to use the hosted model'}
+              </span>
+            </label>
+          )}
+        </div>
+        {(user?.ai_preference ?? 'my_key') === 'my_key' && (
+          <form onSubmit={handleSaveKey} className="settings-page__form settings-page__form--key">
+            <label>
+              <span>OpenAI API key</span>
+              <input
+                type="password"
+                placeholder="sk-…"
+                value={openaiKey}
+                onChange={(e) => setOpenaiKeyLocal(e.target.value)}
+                autoComplete="off"
+              />
+            </label>
+            <div className="settings-page__form-actions">
+              <button type="submit" className="btn-primary" disabled={saving}>
+                {saving ? 'Saving…' : 'Save'}
+              </button>
+              <button type="button" className="btn-delete" onClick={handleClearKey} disabled={saving}>
+                Clear key
+              </button>
+            </div>
+          </form>
+        )}
+        {canUseAi && <p className="settings-page__status success">AI is enabled for your account.</p>}
         {message && (
           <p className={`settings-page__message ${message.type === 'error' ? 'error' : 'success'}`}>
             {message.text}

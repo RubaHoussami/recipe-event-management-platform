@@ -33,8 +33,8 @@ router = APIRouter()
     "/recipes/parse",
     response_model=ParseRecipeResponse,
     summary="Parse recipe from free text",
-    description="Uses Mock by default. Set use_openai=true to use your stored OpenAI key (if configured in settings).",
-    responses={200: {"description": "OK"}, 401: {"description": "Unauthorized"}, 422: {"description": "Validation error"}},
+    description="Set use_openai=true to use AI (your key or hosted model per Settings). Rate-limited.",
+    responses={200: {"description": "OK"}, 401: {"description": "Unauthorized"}, 422: {"description": "Validation error"}, 429: {"description": "Too many requests"}},
     tags=["AI"],
 )
 def parse_recipe(
@@ -49,8 +49,8 @@ def parse_recipe(
     "/events/parse",
     response_model=ParseEventResponse,
     summary="Parse event from free text",
-    description="Uses Mock by default. Set use_openai=true to use your stored OpenAI key (if configured).",
-    responses={200: {"description": "OK"}, 401: {"description": "Unauthorized"}, 422: {"description": "Validation error"}},
+    description="Set use_openai=true to use AI (your key or hosted model per Settings). Rate-limited.",
+    responses={200: {"description": "OK"}, 401: {"description": "Unauthorized"}, 422: {"description": "Validation error"}, 429: {"description": "Too many requests"}},
     tags=["AI"],
 )
 def parse_event(
@@ -64,14 +64,15 @@ def parse_event(
 @router.post(
     "/recipes/assign-cuisine",
     response_model=RecipeResponse,
-    summary="Assign cuisine to recipe (OpenAI required)",
-    description="Uses your stored OpenAI key. Configure it via PATCH /auth/me/ai-key if needed.",
+    summary="Assign cuisine to recipe (AI required)",
+    description="Uses your AI preference (my key or hosted model). Configure in Settings.",
     responses={
         200: {"description": "Recipe updated with cuisine"},
         401: {"description": "Unauthorized"},
-        403: {"description": "Forbidden or OpenAI key not configured"},
+        403: {"description": "Forbidden or AI not enabled"},
         404: {"description": "Recipe not found"},
         422: {"description": "Validation error"},
+        429: {"description": "Too many requests"},
     },
     tags=["AI"],
 )
@@ -86,13 +87,14 @@ def assign_cuisine(
 @router.post(
     "/recipes/suggest",
     response_model=SuggestRecipesResponse,
-    summary="Suggest recipes by cuisine (OpenAI required)",
-    description="Uses your stored OpenAI key. Configure it via PATCH /auth/me/ai-key if needed.",
+    summary="Suggest recipes by cuisine (AI required)",
+    description="Uses your AI preference (my key or hosted model). Configure in Settings.",
     responses={
         200: {"description": "Suggestions"},
         401: {"description": "Unauthorized"},
-        403: {"description": "Forbidden or OpenAI key not configured"},
+        403: {"description": "Forbidden or AI not enabled"},
         422: {"description": "Validation error"},
+        429: {"description": "Too many requests"},
     },
     tags=["AI"],
 )

@@ -13,6 +13,23 @@
 .event-form-page h1 {
   margin: 0 0 1.25rem;
 }
+.event-form-page__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.event-form-page__title-row h1 {
+  margin: 0;
+}
+.event-form-page__parse-btn {
+  flex-shrink: 0;
+}
+.event-form-page__parse-btn--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 .event-form-page form {
   display: flex;

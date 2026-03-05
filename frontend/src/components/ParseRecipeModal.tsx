@@ -11,8 +11,13 @@ interface ParseRecipeModalProps {
   onCreated: () => void
 }
 
+const canUseAi = (u: UserMe | null) =>
+  (u?.ai_preference === 'my_key' && u?.openai_configured) ||
+  (u?.ai_preference === 'hosted' && u?.azure_ai_available && u?.email_verified)
+
 export function ParseRecipeModal({ onClose, onCreated }: ParseRecipeModalProps) {
   const { user } = useOutletContext<{ user: UserMe | null }>()
+  const aiEnabled = canUseAi(user)
   const [freeText, setFreeText] = useState('')
   const [useOpenai, setUseOpenai] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -72,16 +77,16 @@ export function ParseRecipeModal({ onClose, onCreated }: ParseRecipeModalProps) 
             required
           />
           <label
-            className={!user?.openai_configured ? 'modal__label--disabled' : ''}
-            title={!user?.openai_configured ? 'To use this, add API key in Settings' : undefined}
+            className={!aiEnabled ? 'modal__label--disabled' : ''}
+            title={!aiEnabled ? 'Enable AI in Settings (My API key or Use hosted model)' : undefined}
           >
             <input
               type="checkbox"
               checked={useOpenai}
-              onChange={(e) => user?.openai_configured && setUseOpenai(e.target.checked)}
-              disabled={!user?.openai_configured}
+              onChange={(e) => aiEnabled && setUseOpenai(e.target.checked)}
+              disabled={!aiEnabled}
             />
-            Use OpenAI (if configured)
+            Use AI (if enabled in Settings)
           </label>
           <button type="submit" disabled={loading}>Parse</button>
         </form>
@@ -96,7 +101,7 @@ export function ParseRecipeModal({ onClose, onCreated }: ParseRecipeModalProps) 
       </div>
       {apiKeyError && (
         <AlertModal
-          title="OpenAI API key"
+          title="AI / API key"
           message={apiKeyError}
           onClose={() => setApiKeyError(null)}
         />

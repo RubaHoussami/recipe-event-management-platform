@@ -5,6 +5,8 @@ export interface TokenResponse {
   token_type: string
 }
 
+export type AiPreference = 'off' | 'my_key' | 'hosted'
+
 export interface UserMe {
   id: string
   email: string
@@ -13,14 +15,40 @@ export interface UserMe {
   created_at: string
   openai_configured: boolean
   has_avatar: boolean
+  email_verified: boolean
+  ai_preference: AiPreference
+  azure_ai_available: boolean
 }
 
-export async function register(email: string, name: string, password: string): Promise<TokenResponse> {
-  await apiRequest('/auth/register', {
+export interface RegisterResponse {
+  id: string
+  email: string
+  name: string
+  role: string
+  message?: string
+}
+
+export async function register(email: string, name: string, password: string): Promise<RegisterResponse> {
+  return apiRequest<RegisterResponse>('/auth/register', {
     method: 'POST',
     body: JSON.stringify({ email, name, password }),
   })
-  return login(email, password)
+}
+
+export async function verifyEmail(email: string, code: string): Promise<TokenResponse> {
+  const data = await apiRequest<TokenResponse>('/auth/verify-email', {
+    method: 'POST',
+    body: JSON.stringify({ email, code }),
+  })
+  setToken(data.access_token)
+  return data
+}
+
+export async function resendOtp(email: string): Promise<void> {
+  await apiRequest('/auth/resend-otp', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  })
 }
 
 export async function login(email: string, password: string): Promise<TokenResponse> {
@@ -44,6 +72,13 @@ export async function setOpenAIKey(openaiApiKey: string | null): Promise<void> {
   await apiRequest('/auth/me/ai-key', {
     method: 'PATCH',
     body: JSON.stringify({ openai_api_key: openaiApiKey }),
+  })
+}
+
+export async function setAiPreference(aiPreference: AiPreference): Promise<void> {
+  await apiRequest('/auth/me/ai-preference', {
+    method: 'PATCH',
+    body: JSON.stringify({ ai_preference: aiPreference }),
   })
 }
 

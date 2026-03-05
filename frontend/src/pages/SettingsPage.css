@@ -146,6 +146,89 @@
   color: var(--text-muted);
   margin: 0.5rem 0 1rem;
 }
+.settings-page__hint-small {
+  font-size: 0.8rem;
+  margin: 0.25rem 0 1rem;
+}
+
+.settings-page__ai-section {
+  background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+  border: 1px solid var(--border);
+}
+.settings-page__ai-header {
+  margin-bottom: 1.25rem;
+}
+.settings-page__ai-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  font-family: var(--font-display);
+}
+.settings-page__ai-desc {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+.settings-page__ai-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin: 0 0 1.25rem;
+}
+.settings-page__ai-option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.settings-page__ai-option:hover:not(.settings-page__ai-option--disabled) {
+  border-color: var(--accent);
+}
+.settings-page__ai-option--active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.settings-page__ai-option--disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+.settings-page__ai-option input {
+  margin: 0;
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.settings-page__ai-option-label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.settings-page__ai-option-hint {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+.settings-page__form--key {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.settings-page__radio {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.settings-page__radio input {
+  margin: 0;
+}
 
 .settings-page__form {
   width: 100%;

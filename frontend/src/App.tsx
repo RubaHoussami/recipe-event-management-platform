@@ -7,6 +7,7 @@ import { RecipeFormPage } from './pages/RecipeFormPage'
 import { ParseRecipePage } from './pages/ParseRecipePage'
 import { EventsPage } from './pages/EventsPage'
 import { EventFormPage } from './pages/EventFormPage'
+import { ParseEventPage } from './pages/ParseEventPage'
 import { EventDetailPage } from './pages/EventDetailPage'
 import { DashboardHome } from './pages/DashboardHome'
 import { SettingsPage } from './pages/SettingsPage'
@@ -29,6 +30,7 @@ const router = createBrowserRouter([
       { path: 'recipes/:id/edit', element: <RecipeFormPage /> },
       { path: 'events', element: <EventsPage /> },
       { path: 'events/new', element: <EventFormPage /> },
+      { path: 'events/new/parse', element: <ParseEventPage /> },
       { path: 'events/:id', element: <EventDetailPage /> },
       { path: 'events/:id/edit', element: <EventFormPage /> },
       { path: 'shared', element: <SharedWithMePage /> },

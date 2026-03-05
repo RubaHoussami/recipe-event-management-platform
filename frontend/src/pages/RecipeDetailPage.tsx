@@ -23,6 +23,9 @@ export function RecipeDetailPage() {
   const location = useLocation()
   const queryClient = useQueryClient()
   const { user } = useOutletContext<{ user: UserMe | null }>()
+  const canUseAi =
+    (user?.ai_preference === 'my_key' && user?.openai_configured) ||
+    (user?.ai_preference === 'hosted' && user?.azure_ai_available && user?.email_verified)
   const [shareOpen, setShareOpen] = useState(false)
   const [newTag, setNewTag] = useState('')
   const [shareErrors, setShareErrors] = useState<string[]>([])
@@ -130,10 +133,10 @@ export function RecipeDetailPage() {
         {(recipe.access === 'owner' || recipe.access === 'editor') && (
           <button
             type="button"
-            className={`btn-secondary recipe-detail__detect-cuisine${!user?.openai_configured ? ' recipe-detail__detect-cuisine--disabled' : ''}`}
-            onClick={() => user?.openai_configured && assignCuisineMutation.mutate()}
-            disabled={assignCuisineMutation.isPending || !user?.openai_configured}
-            title={!user?.openai_configured ? 'To use this, add API key in Settings' : undefined}
+            className={`btn-secondary recipe-detail__detect-cuisine${!canUseAi ? ' recipe-detail__detect-cuisine--disabled' : ''}`}
+            onClick={() => canUseAi && assignCuisineMutation.mutate()}
+            disabled={assignCuisineMutation.isPending || !canUseAi}
+            title={!canUseAi ? 'Enable AI in Settings (My API key or Use hosted model)' : undefined}
           >
             {assignCuisineMutation.isPending ? 'Detecting…' : 'Detect cuisine'}
           </button>

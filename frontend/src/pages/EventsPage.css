@@ -1,3 +1,9 @@
+.events-page__header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
 .events-page__new {
   display: inline-flex;
   align-items: center;

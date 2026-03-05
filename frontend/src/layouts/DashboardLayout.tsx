@@ -115,8 +115,11 @@ export function DashboardLayout() {
                 <NavLink to="/dashboard/events" className={({ isActive }) => `dashboard__nav-link ${isActive && path === '/dashboard/events' ? 'active' : ''}`}>
                   <IconEvents className="app-icon" /><span className="dashboard__nav-link-text">All events</span>
                 </NavLink>
-                <NavLink to="/dashboard/events/new" className={({ isActive }) => `dashboard__nav-link ${isActive ? 'active' : ''}`}>
+                <NavLink to="/dashboard/events/new" end className={`dashboard__nav-link ${path === '/dashboard/events/new' ? 'active' : ''}`}>
                   <IconAdd className="app-icon" /><span className="dashboard__nav-link-text">New event</span>
+                </NavLink>
+                <NavLink to="/dashboard/events/new/parse" className={`dashboard__nav-link ${path === '/dashboard/events/new/parse' ? 'active' : ''}`}>
+                  <IconSparkles className="app-icon" /><span className="dashboard__nav-link-text">Parse event</span>
                 </NavLink>
               </div>
               <div className="dashboard__nav-section">

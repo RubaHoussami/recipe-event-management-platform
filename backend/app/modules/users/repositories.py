@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 from sqlalchemy import select
@@ -69,6 +70,17 @@ def has_openai_key(db: Session, user_id: str | uuid.UUID) -> bool:
     return bool(user and user.encrypted_openai_api_key)
 
 
+def set_ai_preference(db: Session, user_id: str | uuid.UUID, preference: str) -> None:
+    """Set user AI preference: off, my_key, or hosted."""
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return
+    if preference not in ("off", "my_key", "hosted"):
+        return
+    user.ai_preference = preference
+    db.commit()
+
+
 def update_user_profile(
     db: Session,
     user_id: str | uuid.UUID,
@@ -110,4 +122,41 @@ def clear_avatar_image(db: Session, user_id: str | uuid.UUID) -> None:
         return
     user.avatar_image = None
     user.avatar_content_type = None
+    db.commit()
+
+
+def set_email_otp(
+    db: Session,
+    user_id: str | uuid.UUID,
+    code: str,
+    expires_at: datetime,
+) -> None:
+    """Store OTP code and expiry for email verification."""
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return
+    user.email_otp_code = code
+    user.email_otp_expires_at = expires_at
+    user.email_otp_sent_at = datetime.now(timezone.utc)
+    db.commit()
+
+
+def clear_email_otp(db: Session, user_id: str | uuid.UUID) -> None:
+    """Clear OTP after successful verification."""
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return
+    user.email_otp_code = None
+    user.email_otp_expires_at = None
+    db.commit()
+
+
+def mark_email_verified(db: Session, user_id: str | uuid.UUID) -> None:
+    """Set email_verified_at and clear OTP."""
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return
+    user.email_verified_at = datetime.now(timezone.utc)
+    user.email_otp_code = None
+    user.email_otp_expires_at = None
     db.commit()

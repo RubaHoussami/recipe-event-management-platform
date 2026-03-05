@@ -14,17 +14,23 @@ from app.modules.auth.controllers import (
     login_controller_auth,
     me_controller_auth,
     register_controller_auth,
+    resend_otp_controller,
+    set_ai_preference_controller,
     set_openai_key_controller,
     update_me_controller_auth,
     upload_avatar_controller,
+    verify_email_controller,
 )
 from app.modules.auth.schemas import (
     LoginRequest,
     MeUpdateRequest,
     RegisterRequest,
+    ResendOtpRequest,
+    SetAiPreferenceRequest,
     SetOpenAIKeyRequest,
     TokenResponse,
     UserMeResponse,
+    VerifyEmailRequest,
 )
 from app.modules.users.models import User
 from app.modules.users.repositories import get_user_by_id
@@ -50,7 +56,46 @@ def register(
     db: Annotated[Session, Depends(get_db)],
 ):
     user = register_controller_auth(db, email=body.email, name=body.name, password=body.password)
-    return {"id": str(user.id), "email": user.email, "name": user.name, "role": user.role}
+    return {"id": str(user.id), "email": user.email, "name": user.name, "role": user.role, "message": "Check your email for a verification code."}
+
+
+@router.post(
+    "/verify-email",
+    response_model=TokenResponse,
+    summary="Verify email with OTP",
+    description="Submit the 6-digit code sent to your email. Returns access token on success.",
+    responses={
+        200: {"description": "Verified and logged in"},
+        403: {"description": "Invalid or expired code"},
+        404: {"description": "User not found"},
+    },
+    tags=["Auth"],
+)
+def verify_email(
+    body: VerifyEmailRequest,
+    db: Annotated[Session, Depends(get_db)],
+):
+    return verify_email_controller(db, email=body.email, code=body.code)
+
+
+@router.post(
+    "/resend-otp",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Resend verification code",
+    description="Sends a new OTP to the given email. Rate-limited (e.g. 60s cooldown).",
+    responses={
+        204: {"description": "Code sent"},
+        400: {"description": "Email already verified"},
+        404: {"description": "User not found"},
+        429: {"description": "Wait before requesting again"},
+    },
+    tags=["Auth"],
+)
+def resend_otp(
+    body: ResendOtpRequest,
+    db: Annotated[Session, Depends(get_db)],
+):
+    resend_otp_controller(db, email=body.email)
 
 
 @router.post(
@@ -192,3 +237,23 @@ def set_ai_key(
     current_user: Annotated[User, Depends(get_current_user)],
 ):
     set_openai_key_controller(db, str(current_user.id), body.openai_api_key)
+
+
+@router.patch(
+    "/me/ai-preference",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Set AI preference",
+    description="Set how AI is used: off, my_key (your OpenAI key), or hosted (app’s Azure model).",
+    responses={
+        204: {"description": "Preference updated"},
+        401: {"description": "Unauthorized"},
+        422: {"description": "Validation error"},
+    },
+    tags=["Auth"],
+)
+def set_ai_preference(
+    body: SetAiPreferenceRequest,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    set_ai_preference_controller(db, str(current_user.id), body.ai_preference)

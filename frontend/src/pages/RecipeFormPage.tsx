@@ -6,8 +6,10 @@ import { getRecipe, createRecipe, updateRecipe } from '../api/recipes'
 import type { RecipeCreate } from '../api/recipes'
 import { createShare, listShares, deleteShare } from '../api/shares'
 import { assignCuisine } from '../api/ai'
+import type { RecipeSuggestionItem } from '../api/ai'
 import { AlertModal, getApiKeyErrorDetail } from '../components/AlertModal'
 import { ShareModal } from '../components/ShareModal'
+import { SuggestRecipeModal } from '../components/SuggestRecipeModal'
 import './RecipeFormPage.css'
 
 function errDetailToString(err: unknown): string {
@@ -35,6 +37,9 @@ export function RecipeFormPage() {
   const location = useLocation()
   const queryClient = useQueryClient()
   const { user } = useOutletContext<{ user: UserMe | null }>()
+  const canUseAi =
+    (user?.ai_preference === 'my_key' && user?.openai_configured) ||
+    (user?.ai_preference === 'hosted' && user?.azure_ai_available && user?.email_verified)
   const isEdit = !!id
   const appliedParsedRef = useRef(false)
 
@@ -47,6 +52,7 @@ export function RecipeFormPage() {
   const [shareWith, setShareWith] = useState<ShareWithEntry[]>([ { email: '', permission: 'viewer' } ])
   const [apiKeyError, setApiKeyError] = useState<string | null>(null)
   const [shareOpen, setShareOpen] = useState(false)
+  const [suggestModalOpen, setSuggestModalOpen] = useState(false)
 
   const { data: recipe, isLoading: recipeLoading } = useQuery({
     queryKey: ['recipe', id],
@@ -179,6 +185,15 @@ export function RecipeFormPage() {
     }
   }
 
+  function applySuggestion(s: RecipeSuggestionItem, cuisineStr?: string) {
+    if (s.title) setTitle(s.title)
+    if (cuisineStr) setCuisine(cuisineStr)
+    if (s.ingredients?.length) setIngredients(s.ingredients.length ? s.ingredients : [''])
+    else if (s.ingredients && Array.isArray(s.ingredients)) setIngredients(s.ingredients)
+    if (s.steps?.length) setSteps(s.steps.length ? s.steps : [''])
+    else if (s.steps && Array.isArray(s.steps)) setSteps(s.steps)
+  }
+
   const loading = createMutation.isPending || updateMutation.isPending
   const error = createMutation.error || updateMutation.error
   if (isEdit && recipeLoading) return <p>Loading…</p>
@@ -195,7 +210,25 @@ export function RecipeFormPage() {
       <Link to={isEdit ? '/dashboard/recipes/' + id : '/dashboard/recipes'} state={isEdit ? location.state : undefined} className="recipe-form-page__back">← Back</Link>
       <div className="recipe-form-page__title-row">
         <h1>{isEdit ? 'Edit recipe' : 'New recipe'}</h1>
+        {!isEdit && (
+          <button
+            type="button"
+            className={`btn-secondary recipe-form-page__suggest-btn${!canUseAi ? ' recipe-form-page__suggest-btn--disabled' : ''}`}
+            onClick={() => canUseAi && setSuggestModalOpen(true)}
+            disabled={!canUseAi}
+            title={!canUseAi ? 'Enable AI in Settings to use suggestions' : undefined}
+          >
+            Suggest by cuisine
+          </button>
+        )}
       </div>
+      {suggestModalOpen && (
+        <SuggestRecipeModal
+          onClose={() => setSuggestModalOpen(false)}
+          onSelect={applySuggestion}
+          disabled={!canUseAi}
+        />
+      )}
       <form onSubmit={handleSubmit}>
         <label>
           Title
@@ -211,10 +244,10 @@ export function RecipeFormPage() {
           {isEdit && (
             <button
               type="button"
-              className={`btn-secondary recipe-form-page__detect-cuisine${!user?.openai_configured ? ' recipe-form-page__detect-cuisine--disabled' : ''}`}
-              onClick={() => user?.openai_configured && assignCuisineMutation.mutate()}
-              disabled={assignCuisineMutation.isPending || !user?.openai_configured}
-              title={!user?.openai_configured ? 'To use this, add API key in Settings' : undefined}
+              className={`btn-secondary recipe-form-page__detect-cuisine${!canUseAi ? ' recipe-form-page__detect-cuisine--disabled' : ''}`}
+              onClick={() => canUseAi && assignCuisineMutation.mutate()}
+              disabled={assignCuisineMutation.isPending || !canUseAi}
+              title={!canUseAi ? 'Enable AI in Settings (My API key or Use hosted model)' : undefined}
             >
               {assignCuisineMutation.isPending ? 'Detecting…' : 'Detect cuisine'}
             </button>

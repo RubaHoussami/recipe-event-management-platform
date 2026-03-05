@@ -189,20 +189,19 @@ class OpenAIProvider(AIProvider):
                     {
                         "role": "system",
                         "content": (
-                            "Parse the user's recipe text. Respond with JSON only. Include: "
-                            '"title", "ingredients" (array), "steps" (array). '
-                            'Optionally include: "description", "cuisine", "share_with" (array of email addresses if the text mentions sharing the recipe with someone). '
-                            "Use null for any field you cannot parse."
+                            "Parse the user's recipe text. Return a JSON object only with: "
+                            '"title", "ingredients" (array), "steps" (array), '
+                            '"description" (string or null), "cuisine" (string or null), '
+                            '"share_with" (array of email addresses or null). Use null if unknown."'
                         ),
                     },
                     {"role": "user", "content": free_text[:4000]},
                 ],
+                response_format={"type": "json_object"},
                 max_tokens=1024,
             )
             import json
-            text = response.choices[0].message.content or "{}"
-            text = text.strip().removeprefix("```json").removeprefix("```").strip()
-            data = json.loads(text)
+            data = json.loads(response.choices[0].message.content or "{}")
             title = data.get("title") or "Parsed Recipe"
             ingredients = data.get("ingredients") if isinstance(data.get("ingredients"), list) else []
             steps = data.get("steps") if isinstance(data.get("steps"), list) else []
@@ -227,16 +226,15 @@ class OpenAIProvider(AIProvider):
                 messages=[
                     {
                         "role": "system",
-                        "content": "Parse the user's event description. Respond with JSON only: {\"title\": \"...\", \"start_time\": \"ISO8601\", \"location\": \"...\" or null, \"end_time\": \"ISO8601\" or null}.",
+                        "content": "Parse the user's event description. Return a JSON object only: {\"title\": \"...\", \"start_time\": \"ISO8601\", \"location\": \"...\" or null, \"end_time\": \"ISO8601\" or null}.",
                     },
                     {"role": "user", "content": free_text[:2000]},
                 ],
+                response_format={"type": "json_object"},
                 max_tokens=512,
             )
             import json
-            text = response.choices[0].message.content or "{}"
-            text = text.strip().removeprefix("```json").removeprefix("```").strip()
-            data = json.loads(text)
+            data = json.loads(response.choices[0].message.content or "{}")
             title = data.get("title") or "Parsed Event"
             st = data.get("start_time")
             if st:
@@ -271,12 +269,11 @@ class OpenAIProvider(AIProvider):
                 },
                 {"role": "user", "content": recipe_text[:3000]},
             ],
+            response_format={"type": "json_object"},
             max_tokens=64,
         )
-        text = (r.choices[0].message.content or "{}").strip()
-        if text.startswith("```"):
-            text = re.sub(r"^```\w*\n?", "", text).rstrip("`")
-        data = json.loads(text)
+        import json
+        data = json.loads(r.choices[0].message.content or "{}")
         return (data.get("cuisine") or "Unknown")[:100]
 
     def suggest_recipes_by_cuisine(self, cuisine: str) -> list[dict]:
@@ -289,15 +286,139 @@ class OpenAIProvider(AIProvider):
             messages=[
                 {
                     "role": "system",
-                    "content": "Suggest 3 recipe ideas for the given cuisine. Respond with JSON only: {\"suggestions\": [{\"title\": \"...\", \"ingredients\": [\"...\"], \"steps\": [\"...\"]}, ...]}. Each suggestion has title, ingredients (array of strings), steps (array of strings).",
+                    "content": "Suggest 3 recipe ideas for the given cuisine. Return a JSON object only: {\"suggestions\": [{\"title\": \"...\", \"ingredients\": [\"...\"], \"steps\": [\"...\"]}, ...]}. Each suggestion has title, ingredients (array of strings), steps (array of strings).",
                 },
                 {"role": "user", "content": f"Cuisine: {cuisine}"},
             ],
+            response_format={"type": "json_object"},
             max_tokens=1024,
         )
-        text = (r.choices[0].message.content or "{}").strip()
-        if text.startswith("```"):
-            text = re.sub(r"^```\w*\n?", "", text).rstrip("`")
-        data = json.loads(text)
+        data = json.loads(r.choices[0].message.content or "{}")
+        suggestions = data.get("suggestions") or []
+        return [s for s in suggestions if isinstance(s, dict)][:10]
+
+
+class HuggingFaceProvider(AIProvider):
+    """Uses Hugging Face inference (OpenAI-compatible API). base_url + api_key + model."""
+
+    def __init__(self, *, api_key: str, base_url: str, model: str) -> None:
+        self._api_key = api_key
+        self._base_url = base_url.rstrip("/")
+        self._model = model
+
+    def _client(self):
+        from openai import OpenAI
+        return OpenAI(api_key=self._api_key, base_url=self._base_url)
+
+    def parse_recipe(
+        self, free_text: str
+    ) -> tuple[str | None, list[str] | None, list[str] | None, str | None, str | None, list[str] | None]:
+        try:
+            client = self._client()
+            import json
+            response = client.chat.completions.create(
+                model=self._model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "Parse the user's recipe text. Return a JSON object only with: "
+                            '"title", "ingredients" (array), "steps" (array), '
+                            '"description" (string or null), "cuisine" (string or null), '
+                            '"share_with" (array of email addresses or null). Use null if unknown."'
+                        ),
+                    },
+                    {"role": "user", "content": free_text[:4000]},
+                ],
+                response_format={"type": "json_object"},
+                max_tokens=1024,
+            )
+            data = json.loads(response.choices[0].message.content or "{}")
+            title = data.get("title") or "Parsed Recipe"
+            ingredients = data.get("ingredients") if isinstance(data.get("ingredients"), list) else []
+            steps = data.get("steps") if isinstance(data.get("steps"), list) else []
+            description = data.get("description") if isinstance(data.get("description"), str) else None
+            cuisine = data.get("cuisine") if isinstance(data.get("cuisine"), str) else None
+            share_with = data.get("share_with")
+            if not isinstance(share_with, list):
+                share_with = None
+            else:
+                share_with = [str(e).strip() for e in share_with if e and "@" in str(e)][:20]
+            return title, ingredients or None, steps or None, description, cuisine, share_with or None
+        except Exception:
+            fallback = MockAIProvider()
+            return fallback.parse_recipe(free_text)
+
+    def parse_event(self, free_text: str) -> tuple[str, datetime, str | None, datetime | None]:
+        try:
+            import json
+            client = self._client()
+            response = client.chat.completions.create(
+                model=self._model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Parse the user's event description. Return a JSON object only: {\"title\": \"...\", \"start_time\": \"ISO8601\", \"location\": \"...\" or null, \"end_time\": \"ISO8601\" or null}.",
+                    },
+                    {"role": "user", "content": free_text[:2000]},
+                ],
+                response_format={"type": "json_object"},
+                max_tokens=512,
+            )
+            data = json.loads(response.choices[0].message.content or "{}")
+            title = data.get("title") or "Parsed Event"
+            st = data.get("start_time")
+            if st:
+                start_time = datetime.fromisoformat(st.replace("Z", "+00:00"))
+                if start_time.tzinfo is None:
+                    start_time = start_time.replace(tzinfo=timezone.utc)
+            else:
+                start_time = datetime.now(timezone.utc)
+            location = data.get("location")
+            et = data.get("end_time")
+            end_time = None
+            if et:
+                end_time = datetime.fromisoformat(et.replace("Z", "+00:00"))
+                if end_time.tzinfo is None:
+                    end_time = end_time.replace(tzinfo=timezone.utc)
+            return title, start_time, location, end_time
+        except Exception:
+            fallback = MockAIProvider()
+            return fallback.parse_event(free_text)
+
+    def assign_cuisine(self, recipe_text: str) -> str:
+        import json
+        client = self._client()
+        r = client.chat.completions.create(
+            model=self._model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Given a recipe (title, ingredients, steps), respond with a single cuisine label in JSON: {\"cuisine\": \"Italian\"}. Use one word or short phrase (e.g. Italian, Mexican, Japanese, French, American, Mediterranean).",
+                },
+                {"role": "user", "content": recipe_text[:3000]},
+            ],
+            response_format={"type": "json_object"},
+            max_tokens=64,
+        )
+        data = json.loads(r.choices[0].message.content or "{}")
+        return (data.get("cuisine") or "Unknown")[:100]
+
+    def suggest_recipes_by_cuisine(self, cuisine: str) -> list[dict]:
+        import json
+        client = self._client()
+        r = client.chat.completions.create(
+            model=self._model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Suggest 3 recipe ideas for the given cuisine. Return a JSON object only: {\"suggestions\": [{\"title\": \"...\", \"ingredients\": [\"...\"], \"steps\": [\"...\"]}, ...]}. Each suggestion has title, ingredients (array of strings), steps (array of strings).",
+                },
+                {"role": "user", "content": f"Cuisine: {cuisine}"},
+            ],
+            response_format={"type": "json_object"},
+            max_tokens=1024,
+        )
+        data = json.loads(r.choices[0].message.content or "{}")
         suggestions = data.get("suggestions") or []
         return [s for s in suggestions if isinstance(s, dict)][:10]

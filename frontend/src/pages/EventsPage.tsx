@@ -42,7 +42,10 @@ export function EventsPage() {
     <div className="events-page">
       <div className="page-header">
         <h1>Events</h1>
-        <Link to="/dashboard/events/new" className="btn-primary events-page__new">New event</Link>
+        <div className="events-page__header-actions">
+          <Link to="/dashboard/events/new" className="btn-primary events-page__new">New event</Link>
+          <Link to="/dashboard/events/new/parse" className="btn-secondary">Parse event</Link>
+        </div>
       </div>
       <div className="events-page__toolbar">
         <input

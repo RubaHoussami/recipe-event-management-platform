@@ -32,6 +32,24 @@ class Settings(BaseSettings):
     # Encrypt user-stored OpenAI keys at rest (Fernet key: 32 bytes base64url)
     encryption_key: str = ""
 
+    # Email (OTP verification). If not set, OTP is logged but not sent.
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    email_from: str = "noreply@feastandfest.local"
+    otp_expire_minutes: int = 15
+    otp_resend_cooldown_seconds: int = 60
+
+    # Hugging Face inference (hosted model). OpenAI-compatible API at router.huggingface.co.
+    # If set, verified users can choose "Use hosted model" in settings.
+    hf_api_key: str = ""
+    hf_base_url: str = "https://router.huggingface.co/v1"
+    hf_model: str = ""
+
+    # AI rate limit: max requests per user per window (for hosted/model calls).
+    ai_rate_limit_per_minute: int = 30
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def parse_cors_origins(cls, v: str | List[str]) -> List[str]:

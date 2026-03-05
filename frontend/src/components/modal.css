@@ -66,6 +66,27 @@
   gap: 0.5rem;
   font-size: 0.9375rem;
 }
+.modal__textarea-label {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+}
+.modal__textarea-label span {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.modal__textarea-label textarea {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 0.9375rem;
+  resize: vertical;
+  min-height: 80px;
+}
+.modal--parse-event {
+  max-width: 420px;
+}
 .modal__label--disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -125,4 +146,73 @@
 }
 .modal__parsed button {
   margin-top: 0.5rem;
+}
+
+.modal--suggest {
+  max-width: 420px;
+}
+.modal__intro {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  margin: 0 0 1rem;
+}
+.modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.modal__form label {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+}
+.modal__form label span {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.modal__suggestions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.modal__suggestions-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0 0 0.5rem;
+}
+.modal__suggestions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.modal__suggestion-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.modal__suggestion-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+.modal__suggestion-info strong {
+  font-size: 0.9375rem;
+}
+.modal__suggestion-meta {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+.modal__suggestion-use {
+  flex-shrink: 0;
 }
