@@ -1,4 +1,4 @@
-name: Build and deploy frontend to Azure Storage Static Website
+name: Build and deploy frontend to Azure Storage Static Website 
 
 on:
   push:
