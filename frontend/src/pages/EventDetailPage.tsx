@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getEvent, deleteEvent, getEventAttendees, listEventInvites, deleteEventInvite } from '../api/events'
+import { getEvent, deleteEvent, listEventInvites, deleteEventInvite } from '../api/events'
 import { ShareModal } from '../components/ShareModal'
 import './EventDetailPage.css'
 
@@ -31,11 +31,6 @@ export function EventDetailPage() {
     queryFn: () => getEvent(id!),
     enabled: !!id,
   })
-  const { data: attendees } = useQuery({
-    queryKey: ['event-attendees', id],
-    queryFn: () => getEventAttendees(id!),
-    enabled: !!id && event?.access === 'owner',
-  })
   const { data: invites } = useQuery({
     queryKey: ['event-invites', id],
     queryFn: () => listEventInvites(id!),
@@ -53,7 +48,6 @@ export function EventDetailPage() {
     mutationFn: (inviteId: string) => deleteEventInvite(id!, inviteId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['event-invites', id] })
-      queryClient.invalidateQueries({ queryKey: ['event-attendees', id] })
     },
   })
 
@@ -146,7 +140,6 @@ export function EventDetailPage() {
           onClose={() => setShareOpen(false)}
           onUpdated={() => {
             queryClient.invalidateQueries({ queryKey: ['event-invites', id] })
-            queryClient.invalidateQueries({ queryKey: ['event-attendees', id] })
           }}
         />
       )}

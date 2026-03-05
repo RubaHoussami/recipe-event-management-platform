@@ -32,7 +32,11 @@ export function ParseRecipeModal({ onClose, onCreated }: ParseRecipeModalProps) 
     setLoading(true)
     try {
       const res = await parseRecipe(freeText, useOpenai)
-      setParsed(res)
+      setParsed({
+        title: res.title ?? 'Untitled recipe',
+        ingredients: res.ingredients ?? [],
+        steps: res.steps ?? [],
+      })
     } catch (err: unknown) {
       const apiKeyMsg = getApiKeyErrorDetail(err)
       if (apiKeyMsg) setApiKeyError(apiKeyMsg)

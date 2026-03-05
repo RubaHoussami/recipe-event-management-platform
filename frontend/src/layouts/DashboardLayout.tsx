@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query'
 import { getToken } from '../api/http'
 import { getMe, logout } from '../api/auth'
 import { listNotifications } from '../api/notifications'
-import type { UserMe } from '../api/auth'
 import { useMyAvatarUrl } from '../hooks/useMyAvatarUrl'
 import { useTheme } from '../contexts/ThemeContext'
 import {

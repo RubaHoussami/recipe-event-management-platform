@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { useParams, useNavigate, Link, useLocation, useOutletContext } from 'react-router-dom'
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import type { UserMe } from '../api/auth'
 import { getEvent, createEvent, updateEvent, createEventInvite, listEventInvites, deleteEventInvite } from '../api/events'
 import type { EventCreate, EventUpdate } from '../api/events'
 import { ShareModal } from '../components/ShareModal'
@@ -55,7 +54,6 @@ export function EventFormPage() {
   const navigate = useNavigate()
   const routerLocation = useLocation()
   const queryClient = useQueryClient()
-  const { user } = useOutletContext<{ user: UserMe | null }>()
   const isEdit = !!id
   const appliedParsedRef = useRef(false)
 
